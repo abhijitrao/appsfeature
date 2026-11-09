@@ -12,6 +12,8 @@ A modern static app showcase for Android applications and Windows software, with
 ## Site pages
 - `index.html` — homepage, Android/Windows catalogue tabs, and featured developer introduction.
 - `developer.html` — detailed developer profile.
+- `privacy.html` — Website privacy policy.
+- `terms.html` — Website terms and conditions.
 
 ## Add an application
 Edit `assets/js/apps.js` and add an object to `window.APPSFEATURE_APPS`.
@@ -25,6 +27,9 @@ Open `index.html` in a browser or run `python -m http.server 8000`.
 The workflow in `.github/workflows/pages.yml` publishes the repository root to GitHub Pages whenever changes are pushed to `main`. In repository Settings → Pages, select **GitHub Actions** as the build and deployment source.
 
 Custom domain: configure `appsfeature.com` in Settings → Pages and add the DNS records GitHub provides at your domain registrar.
+
+## Legal pages
+The Privacy Policy and Terms & Conditions apply to the AppsFeature website. Individual applications may require separate, product-specific privacy notices and licences. Review these pages before changing the Website's data collection or external services.
 
 ## Branding
 The approved AppsFeature logo is stored at `assets/images/appsfeature-logo.png` and used in the site header, footer, and favicon. The displayed asset is an optimized 256px copy; the original uploaded artwork remains unchanged in concept, shape, and colors.
