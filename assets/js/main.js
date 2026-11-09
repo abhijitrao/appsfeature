@@ -7,7 +7,7 @@
  function render(){
   const filtered=apps.filter(a=>a.platform===platform&&(category==='all'||a.category===category)&&((a.name+' '+a.description+' '+a.category).toLowerCase().includes(query)));
   label.textContent=(platform==='android'?'ANDROID':'WINDOWS')+' APPLICATIONS · '+filtered.length;
-  grid.innerHTML=filtered.map(a=>'<article class="app-card"><div class="app-icon" aria-hidden="true">'+escapeHtml(a.icon||'AF')+'</div><div class="app-info"><h3>'+escapeHtml(a.name)+'</h3><p>'+escapeHtml(a.description)+'</p><div class="app-meta"><span class="app-version">'+escapeHtml(a.version||'')+'</span><span class="app-category">'+escapeHtml(a.category)+'</span><a class="app-link" href="'+safeUrl(a.url)+'" target="_blank" rel="noopener noreferrer">'+escapeHtml(a.status||'View project')+' ↗</a></div></div></article>').join('');
+  grid.innerHTML=filtered.map(a=>'<article class="app-card"><div class="app-icon" aria-hidden="true">'+escapeHtml(a.icon||'AF')+'</div><div class="app-info"><h3>'+escapeHtml(a.name)+'</h3><p>'+escapeHtml(a.description)+'</p><div class="app-meta"><span class="app-version">'+escapeHtml(a.version||'')+'</span><span class="app-category">'+escapeHtml(a.category)+'</span></div><div class="app-actions">'+(a.detailUrl?'<a class="app-link" href="'+safeUrl(a.detailUrl)+'">View details →</a>':'')+'<a class="app-source-link" href="'+safeUrl(a.url)+'" target="_blank" rel="noopener noreferrer">GitHub ↗</a></div></div></article>').join('');
   empty.hidden=filtered.length!==0;
  }
  function escapeHtml(v){return String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
