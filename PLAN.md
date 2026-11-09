@@ -34,10 +34,10 @@ The current iteration presents Android and Windows as separate tabs on the home 
 - No database or server-side application code.
 
 ## App catalogue workflow
-Add or update entries in `assets/js/apps.js`. Each entry should include:
+Add or update entries in the appropriate platform/category JSON file under `assets/data/`. Each entry should include:
 - `id`, `name`, `platform` (`android` or `windows`), `category`, `version`, `description`, `icon`, `status`, and `url`.
 - Only use real, tested project/download URLs and accurate release information.
-- Add screenshots and app artwork only when supplied or approved.
+- Add screenshots and app artwork only when supplied or approved. Screenshot filenames live in each app's optional `screenshots` array; image files stay together in `assets/images/screenshots/`.
 
 ## Delivery milestones
 - [x] Create repository and initial static site.
@@ -96,3 +96,14 @@ assets/
 ```
 
 The `apps.json` file in each platform folder is reserved for general applications that do not belong to a specialised category. Empty categories use an empty JSON array. Category IDs remain stable and match the existing homepage filter values.
+
+ 
+ ## Optional app screenshots
+ - [x] Add an optional `screenshots` filename array to app catalogue entries.
+ - [x] Keep screenshot files in one shared `assets/images/screenshots/` directory; JSON stores filenames only.
+ - [x] Add a reusable detail-page gallery that supports multiple screenshots and a larger preview.
+ - [x] Hide the entire gallery when the screenshot list is missing or empty.
+ - [ ] Add supplied/approved screenshot images and verify the gallery at final website testing.
+ 
+ Screenshot filenames must be unique across apps (for example, `droidshare-wifi-1.png` and `network-simulator-1.png`). Supported formats: PNG, JPG/JPEG and WebP.
+ 
