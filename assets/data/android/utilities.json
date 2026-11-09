@@ -1,0 +1,14 @@
+[
+  {
+    "id": "droidshare-wifi",
+    "name": "DroidShare WiFi",
+    "platform": "android",
+    "category": "utility",
+    "version": "In development",
+    "description": "A Wi-Fi file transfer app for moving files between Android devices and computers.",
+    "icon": "DS",
+    "status": "In development",
+    "detailUrl": "droidshare-wifi.html",
+    "url": "https://github.com/abhijitrao/DroidShare-WiFi"
+  }
+]
