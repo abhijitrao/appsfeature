@@ -1,11 +1,15 @@
 # AppsFeature
 
-A modern static app showcase for Android applications and Windows software.
+A modern static app showcase for Android applications and Windows software, with a dedicated developer profile.
 
 ## Stack
 - HTML, CSS and vanilla JavaScript
 - App catalogue in `assets/js/apps.js` (no PHP or database)
 - GitHub Pages deployment via GitHub Actions
+
+## Site pages
+- `index.html` — homepage, Android/Windows catalogue tabs, and featured developer introduction.
+- `developer.html` — detailed developer profile.
 
 ## Add an application
 Edit `assets/js/apps.js` and add an object to `window.APPSFEATURE_APPS`.
@@ -21,4 +25,4 @@ The workflow in `.github/workflows/pages.yml` publishes the repository root to G
 Custom domain: configure `appsfeature.com` in Settings → Pages and add the DNS records GitHub provides at your domain registrar.
 
 ## Branding
-The current layout uses a temporary text/graphic brand mark. The approved original logo should be added at `assets/images/appsfeature-logo.png` and then wired into the header and footer without changing its artwork or proportions.
+The current header/footer mark is temporary. The approved original logo still needs to be added under `assets/images/` and wired into the header and footer without changing its artwork, colors, or proportions.
