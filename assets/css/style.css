@@ -19,11 +19,11 @@
 .screenshot-card{display:block;align-self:start;padding:0;overflow:hidden;min-width:0;height:auto;aspect-ratio:auto;background:#0b1116;border:1px solid var(--line);border-radius:12px;cursor:zoom-in;transition:border-color .2s,transform .2s}
 .screenshot-card:hover{border-color:#39866e;transform:translateY(-3px)}
 .screenshot-card img{display:block;width:100%;height:auto;object-fit:contain}
-.screenshot-viewer{position:fixed;max-width:min(92vw,900px);max-height:92vh;width:auto;height:auto;padding:48px 58px 24px;background:#0b1116;border:1px solid #49645c;border-radius:14px;color:var(--text);overflow:visible}
+.screenshot-viewer{position:fixed;box-sizing:border-box;width:100vw;max-width:100vw;height:100vh;height:100dvh;max-height:100vh;max-height:100dvh;margin:0;padding:54px 58px 24px;background:#080c10;border:0;border-radius:0;color:var(--text);overflow:hidden;place-content:center}
 .screenshot-viewer::backdrop{background:rgba(0,0,0,.88);backdrop-filter:blur(5px)}
-.screenshot-viewer-image{display:block;max-width:min(72vw,760px);max-height:78vh;width:auto;height:auto;object-fit:contain;margin:auto}
+.screenshot-viewer-image{display:block;max-width:calc(100vw - 116px);max-height:calc(100vh - 90px);max-height:calc(100dvh - 90px);width:auto;height:auto;object-fit:contain;margin:auto}
 .screenshot-viewer button{position:absolute;display:grid;place-items:center;width:38px;height:38px;border:1px solid var(--line);border-radius:50%;background:#14221f;color:var(--mint);font-size:26px;cursor:pointer}
 .screenshot-viewer-close{top:8px;right:8px}
 .screenshot-viewer-previous{left:8px;top:50%;transform:translateY(-50%)}
 .screenshot-viewer-next{right:8px;top:50%;transform:translateY(-50%)}
-@media(max-width:600px){.screenshot-gallery{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.screenshot-viewer{padding:48px 42px 20px;max-width:96vw}.screenshot-viewer-image{max-width:80vw;max-height:75vh}}
+@media(max-width:600px){.screenshot-gallery{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.screenshot-viewer{padding:52px 12px 20px;max-width:100vw}.screenshot-viewer-image{max-width:calc(100vw - 24px);max-height:calc(100dvh - 82px)}}
