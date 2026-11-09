@@ -26,3 +26,10 @@ Custom domain: configure `appsfeature.com` in Settings → Pages and add the DNS
 
 ## Branding
 The approved AppsFeature logo is stored at `assets/images/appsfeature-logo.png` and used in the site header, footer, and favicon. The displayed asset is an optimized 256px copy; the original uploaded artwork remains unchanged in concept, shape, and colors.
+
+
+## Custom domain DNS
+The repository includes a `CNAME` file for `appsfeature.com`. In GoDaddy DNS, use:
+- Apex/root (`@`): A records `185.199.108.153`, `185.199.109.153`, `185.199.110.153`, `185.199.111.153`.
+- `www`: CNAME to `abhijitrao.github.io`.
+Remove conflicting A/AAAA/CNAME records for these same hostnames. After DNS is saved, enable **Enforce HTTPS** in GitHub Pages when it becomes available. DNS changes and certificate issuance can take time.
