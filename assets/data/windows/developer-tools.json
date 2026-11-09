@@ -1,0 +1,14 @@
+[
+  {
+    "id": "network-simulator",
+    "name": "Network Simulator",
+    "platform": "windows",
+    "category": "developer",
+    "version": "1.0",
+    "description": "A desktop tool for testing TCP and TLS network conditions with physical POS terminals.",
+    "icon": "NS",
+    "status": "Version 1.0",
+    "detailUrl": "network-simulator.html",
+    "url": "https://github.com/abhijitrao/NetworkSimulator"
+  }
+]
