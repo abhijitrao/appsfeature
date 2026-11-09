@@ -1,14 +1,17 @@
 [
   {
-    "id": "all",
-    "label": "All apps"
-  },
-  {
     "id": "utility",
-    "label": "Utilities"
+    "label": "Utilities",
+    "file": "utilities.json"
   },
   {
     "id": "developer",
-    "label": "Developer tools"
+    "label": "Developer tools",
+    "file": "developer-tools.json"
+  },
+  {
+    "id": "apps",
+    "label": "General apps",
+    "file": "apps.json"
   }
 ]
