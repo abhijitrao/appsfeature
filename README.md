@@ -14,6 +14,11 @@ A modern static app showcase for Android applications and Windows software, with
 - `developer.html` — detailed developer profile.
 - `privacy.html` — Website privacy policy.
 - `terms.html` — Website terms and conditions.
+- `droidshare-wifi.html` — DroidShare WiFi project overview and implementation status.
+- `network-simulator.html` — Network Simulator features, version and limitations.
+
+## App detail pages
+The current catalogue entries link to dedicated static product pages. Keep product descriptions, implementation status, version details and download links aligned with each project's source repository. Do not advertise workflow artifacts as permanent direct download URLs.
 
 ## Add an application
 Edit `assets/js/apps.js` and add an object to `window.APPSFEATURE_APPS`.
