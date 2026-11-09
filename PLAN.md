@@ -65,3 +65,34 @@ Add or update entries in `assets/js/apps.js`. Each entry should include:
 - All images have useful alternative text and are optimized.
 - Deployment succeeds from a push to `main`.
 - Custom domain serves HTTPS after DNS propagation.
+
+
+## Modular JSON catalogue architecture
+- [x] Keep Android and Windows catalogue data in separate platform folders.
+- [x] Split catalogue entries by category so each JSON file stays focused.
+- [x] Keep shared category metadata in `assets/data/common/categories.json`.
+- [x] Add `assets/js/appsRepository.js` to load and cache platform/category JSON files.
+- [x] Update the homepage catalogue to load data asynchronously from the repository module.
+- [x] Remove the legacy JavaScript catalogue data file after migration.
+- [ ] Verify platform switching, category filters, search, empty states, and GitHub Pages fetch paths at the final testing stage.
+
+### Catalogue layout
+```text
+assets/
+├── data/
+│   ├── android/
+│   │   ├── apps.json
+│   │   ├── utilities.json
+│   │   └── developer-tools.json
+│   ├── windows/
+│   │   ├── apps.json
+│   │   ├── utilities.json
+│   │   └── developer-tools.json
+│   └── common/
+│       └── categories.json
+└── js/
+    ├── appsRepository.js
+    └── main.js
+```
+
+The `apps.json` file in each platform folder is reserved for general applications that do not belong to a specialised category. Empty categories use an empty JSON array. Category IDs remain stable and match the existing homepage filter values.
