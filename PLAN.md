@@ -49,6 +49,7 @@ Add or update entries in `assets/js/apps.js`. Each entry should include:
 - [x] Integrate the approved logo and align header/footer branding with the supplied artwork.
 - [ ] Enable GitHub Pages using GitHub Actions and verify deployment.
 - [ ] Configure `appsfeature.com` DNS and GitHub Pages custom domain/HTTPS.
+- [x] Add Website Privacy Policy and Terms & Conditions pages and footer navigation.
 - [ ] Verify mobile/desktop layouts, navigation, search, and all outbound links.
 - [ ] Add dedicated app detail pages when verified app descriptions, screenshots, versions, and download/release URLs are available.
 - [x] Keep `abhijitrao/appsfeature` as the permanent source repository; no fork is required.
