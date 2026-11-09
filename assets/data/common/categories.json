@@ -1,0 +1,14 @@
+[
+  {
+    "id": "all",
+    "label": "All apps"
+  },
+  {
+    "id": "utility",
+    "label": "Utilities"
+  },
+  {
+    "id": "developer",
+    "label": "Developer tools"
+  }
+]
