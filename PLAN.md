@@ -45,6 +45,7 @@ Add or update entries in `assets/js/apps.js`. Each entry should include:
 - [x] Add project plan and contributor/agent guidance.
 - [x] Add a dedicated developer profile page and connect it to homepage navigation.
 - [x] Integrate the approved original logo asset in the header, footer, and favicon.
+- [x] Improve keyboard navigation, tab semantics, screen-reader states, and mobile-menu accessibility.
 - [x] Integrate the approved logo and align header/footer branding with the supplied artwork.
 - [ ] Enable GitHub Pages using GitHub Actions and verify deployment.
 - [ ] Configure `appsfeature.com` DNS and GitHub Pages custom domain/HTTPS.
