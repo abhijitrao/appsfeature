@@ -1,5 +1,7 @@
 # AppsFeature
 
+Canonical source repository: [abhijitrao/appsfeature](https://github.com/abhijitrao/appsfeature). The separate `appsfeature` GitHub account is not used for hosting; the public brand website is served from the custom domain `appsfeature.com`.
+
 A modern static app showcase for Android applications and Windows software, with a dedicated developer profile.
 
 ## Stack

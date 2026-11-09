@@ -51,7 +51,7 @@ Add or update entries in `assets/js/apps.js`. Each entry should include:
 - [ ] Configure `appsfeature.com` DNS and GitHub Pages custom domain/HTTPS.
 - [ ] Verify mobile/desktop layouts, navigation, search, and all outbound links.
 - [ ] Add dedicated app detail pages when verified app descriptions, screenshots, versions, and download/release URLs are available.
-- [ ] Fork the finished repository to the `appsfeature` GitHub account when ready.
+- [x] Keep `abhijitrao/appsfeature` as the permanent source repository; no fork is required.
 
 ## Acceptance checklist
 - Android and Windows tabs switch independently and announce selected state accessibly.
