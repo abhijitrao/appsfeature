@@ -18,7 +18,7 @@ AppsFeature is a lightweight, modern showcase for independently developed Androi
 4. Developer — Abhijit Rao profile, experience, skills, projects, and public contact links.
 5. Contact — public collaboration/contact route.
 
-The current first iteration presents platform tabs on the collection section and a developer profile section on the home page. Dedicated platform and detail pages can be added as the catalogue grows.
+The current iteration presents Android and Windows as separate tabs on the home page, includes a featured developer section, and provides a dedicated `developer.html` profile page. Dedicated platform and app detail pages can be added as the catalogue grows.
 
 ## Visual direction
 - Use the supplied logo as the source of truth for brand colors and geometry.
@@ -43,6 +43,7 @@ Add or update entries in `assets/js/apps.js`. Each entry should include:
 - [x] Create repository and initial static site.
 - [x] Add responsive visual foundation, platform tabs, catalogue search/filter, developer profile, and Pages workflow.
 - [x] Add project plan and contributor/agent guidance.
+- [x] Add a dedicated developer profile page and connect it to homepage navigation.
 - [ ] Integrate the approved original logo asset.
 - [ ] Review and refine layout against the actual logo and supplied app artwork.
 - [ ] Enable GitHub Pages using GitHub Actions and verify deployment.
