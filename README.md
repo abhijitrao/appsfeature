@@ -25,4 +25,4 @@ The workflow in `.github/workflows/pages.yml` publishes the repository root to G
 Custom domain: configure `appsfeature.com` in Settings → Pages and add the DNS records GitHub provides at your domain registrar.
 
 ## Branding
-The current header/footer mark is temporary. The approved original logo still needs to be added under `assets/images/` and wired into the header and footer without changing its artwork, colors, or proportions.
+The approved AppsFeature logo is stored at `assets/images/appsfeature-logo.png` and used in the site header, footer, and favicon. The displayed asset is an optimized 256px copy; the original uploaded artwork remains unchanged in concept, shape, and colors.
