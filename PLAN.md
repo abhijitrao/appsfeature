@@ -54,6 +54,9 @@ Add or update entries in `assets/js/apps.js`. Each entry should include:
 - [x] Add dedicated DroidShare WiFi and Network Simulator detail pages using verified repository documentation and clear implementation status.
 - [x] Keep `abhijitrao/appsfeature` as the permanent source repository; no fork is required.
 
+- [ ] Create a dedicated transparent favicon asset; preserve the approved logo geometry, proportions, and colors, and keep the existing header/footer logo unchanged.
+- [ ] Reference the dedicated favicon consistently across every HTML page and verify browser-tab rendering after deployment.
+
 ## Acceptance checklist
 - Android and Windows tabs switch independently and announce selected state accessibly.
 - Search and category filters work on both platforms.
