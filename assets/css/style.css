@@ -15,10 +15,10 @@
 
 /* Optional app screenshot gallery */
 .screenshot-section[hidden]{display:none}
-.screenshot-gallery{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px;margin-top:28px}
-.screenshot-card{display:block;align-self:start;padding:0;overflow:hidden;min-width:0;height:auto;aspect-ratio:auto;background:#0b1116;border:1px solid var(--line);border-radius:12px;cursor:zoom-in;transition:border-color .2s,transform .2s}
+.screenshot-gallery{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),360px));align-items:start;gap:14px;margin-top:28px}
+.screenshot-card{display:grid;place-items:center;align-self:start;width:100%;max-height:360px;padding:10px;overflow:hidden;min-width:0;background:#0b1116;border:1px solid var(--line);border-radius:12px;cursor:zoom-in;transition:border-color .2s,transform .2s}
 .screenshot-card:hover{border-color:#39866e;transform:translateY(-3px)}
-.screenshot-card img{display:block;width:100%;height:auto;object-fit:contain}
+.screenshot-card img{display:block;width:100%;max-height:338px;height:338px;object-fit:contain}
 .screenshot-viewer{position:fixed;box-sizing:border-box;width:100vw;max-width:100vw;height:100vh;height:100dvh;max-height:100vh;max-height:100dvh;margin:0;padding:54px 58px 24px;background:#080c10;border:0;border-radius:0;color:var(--text);overflow:hidden;place-content:center}
 .screenshot-viewer::backdrop{background:rgba(0,0,0,.88);backdrop-filter:blur(5px)}
 .screenshot-viewer-image{display:block;max-width:calc(100vw - 116px);max-height:calc(100vh - 90px);max-height:calc(100dvh - 90px);width:auto;height:auto;object-fit:contain;margin:auto}
@@ -26,7 +26,7 @@
 .screenshot-viewer-close{top:8px;right:8px}
 .screenshot-viewer-previous{left:8px;top:50%;transform:translateY(-50%)}
 .screenshot-viewer-next{right:8px;top:50%;transform:translateY(-50%)}
-@media(max-width:600px){.screenshot-gallery{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.screenshot-viewer{padding:52px 12px 20px;max-width:100vw}.screenshot-viewer-image{max-width:calc(100vw - 24px);max-height:calc(100dvh - 82px)}}
+@media(max-width:600px){.screenshot-gallery{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.screenshot-card{max-height:250px;padding:6px}.screenshot-card img{height:230px;max-height:230px}.screenshot-viewer{padding:52px 12px 20px;max-width:100vw}.screenshot-viewer-image{max-width:calc(100vw - 24px);max-height:calc(100dvh - 82px)}}
 
 /* Mobile viewport width safeguards */
 html,body{width:100%;min-width:0;max-width:100%;margin-right:0}
