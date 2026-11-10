@@ -1,4 +1,9 @@
-const BRANCH = "feature-admin";
+const ALLOWED_BRANCHES = ["main", "feature-admin"];
+export function resolveBranch(value) {
+  const branch = value || "main";
+  if (!ALLOWED_BRANCHES.includes(branch)) throw new Error("Selected branch is not allowed.");
+  return branch;
+}
 const REPO = "abhijitrao/appsfeature";
 export const CATALOGUE_PATHS = [
   "assets/data/common/categories.json",
@@ -108,4 +113,4 @@ export function validateCatalogue(path, data) {
     ids.add(item.id);
   }
 }
-export { BRANCH, REPO };
+export { REPO };
