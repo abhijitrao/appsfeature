@@ -31,7 +31,8 @@
           <button class="reveal-button" type="button" id="toggle-password" aria-label="Show password"><svg viewBox="0 0 24 24"><path d="M2.5 12s3.4-6 9.5-6 9.5 6 9.5 6-3.4 6-9.5 6-9.5-6-9.5-6Z"/><circle cx="12" cy="12" r="2.5"/></svg></button>
         </div>
         <p class="auth-error" id="auth-error" role="alert" hidden></p>
-        <button class="primary-button auth-submit" type="submit">Continue <span>→</span></button>
+        <button class="primary-button auth-submit" type="submit">Sign in <span>→</span></button>
+        <button class="preview-button" id="preview-dashboard" type="button">Preview dashboard UI</button>
       </form>
       <div class="auth-foot"><span class="status-dot"></span> Secure admin access · Authentication setup pending</div>
       <a class="back-link" href="index.html">← Back to AppsFeature website</a>
@@ -58,9 +59,9 @@
       <div class="sidebar-label">WORKSPACE</div>
       <button class="side-link active" data-view="overview"><span class="side-icon">▦</span> Overview</button>
       <div class="sidebar-label section-label">CATALOGUE</div>
-      <button class="side-link" data-view="categories"><span class="side-icon">◇</span> Categories <span class="side-count">2</span></button>
-      <button class="side-link" data-view="android"><span class="side-icon android-symbol">◉</span> Android <span class="side-count">3</span></button>
-      <button class="side-link" data-view="windows"><span class="side-icon windows-symbol">▦</span> Windows <span class="side-count">3</span></button>
+      <button class="side-link" data-view="categories"><span class="side-icon">◇</span> Categories <span class="side-count">3</span></button>
+      <button class="side-link" data-view="android"><span class="side-icon android-symbol">◉</span> Android <span class="side-count">1</span></button>
+      <button class="side-link" data-view="windows"><span class="side-icon windows-symbol">▦</span> Windows <span class="side-count">1</span></button>
       <div class="sidebar-bottom">
         <div class="branch-card"><span class="branch-dot"></span><div><small>ACTIVE BRANCH</small><strong>feature-admin</strong></div></div>
         <button class="side-link logout-link" id="logout-button"><span class="side-icon">↪</span> Sign out</button>
@@ -81,10 +82,10 @@
         </section>
 
         <section class="stats-grid" aria-label="Catalogue summary">
-          <article class="stat-card"><div class="stat-top"><span>Total records</span><span class="stat-icon">▤</span></div><strong>6</strong><small><i class="positive-dot"></i> Across Android & Windows</small></article>
-          <article class="stat-card"><div class="stat-top"><span>Categories</span><span class="stat-icon">◇</span></div><strong>2</strong><small>Utilities · Developer tools</small></article>
-          <article class="stat-card"><div class="stat-top"><span>Android records</span><span class="stat-icon android-stat">◉</span></div><strong>3</strong><small>Application catalogue</small></article>
-          <article class="stat-card"><div class="stat-top"><span>Windows records</span><span class="stat-icon windows-stat">▦</span></div><strong>3</strong><small>Desktop software catalogue</small></article>
+          <article class="stat-card"><div class="stat-top"><span>Total records</span><span class="stat-icon">▤</span></div><strong>2</strong><small><i class="positive-dot"></i> Across Android & Windows</small></article>
+          <article class="stat-card"><div class="stat-top"><span>Categories</span><span class="stat-icon">◇</span></div><strong>3</strong><small>Utilities · Developer tools · General apps</small></article>
+          <article class="stat-card"><div class="stat-top"><span>Android records</span><span class="stat-icon android-stat">◉</span></div><strong>1</strong><small>Application catalogue</small></article>
+          <article class="stat-card"><div class="stat-top"><span>Windows records</span><span class="stat-icon windows-stat">▦</span></div><strong>1</strong><small>Desktop software catalogue</small></article>
         </section>
 
         <section class="content-panel">
@@ -93,7 +94,7 @@
             <tr><td><div class="record-name"><span class="record-avatar">DS</span><span><strong>DroidShare WiFi</strong><small>droidshare-wifi</small></span></div></td><td><span class="platform-tag android-tag">Android</span></td><td>Utilities</td><td><span class="status-tag in-progress">In development</span></td><td><a href="https://github.com/abhijitrao/DroidShare-WiFi" target="_blank" rel="noreferrer">GitHub ↗</a></td></tr>
             <tr><td><div class="record-name"><span class="record-avatar windows-avatar">NS</span><span><strong>Network Simulator</strong><small>network-simulator</small></span></div></td><td><span class="platform-tag windows-tag">Windows</span></td><td>Developer tools</td><td><span class="status-tag published">Version 1.0</span></td><td><a href="https://github.com/abhijitrao/NetworkSimulator" target="_blank" rel="noreferrer">GitHub ↗</a></td></tr>
           </tbody></table></div>
-          <div class="table-footer"><span>Showing sample records from the existing catalogue</span><span>Source: <code>assets/data/</code></span></div>
+          <div class="table-footer"><span>Showing 2 current records from the JSON catalogue</span><span>Source: <code>assets/data/</code></span></div>
         </section>
         <section class="bottom-grid">
           <article class="content-panel quick-panel"><div class="panel-heading"><div><h2>Quick access</h2><p>Jump to a catalogue section.</p></div></div><div class="quick-links"><button data-view="categories"><span class="quick-icon">◇</span><span><strong>Manage categories</strong><small>Review catalogue groups</small></span><b>→</b></button><button data-view="android"><span class="quick-icon android-stat">◉</span><span><strong>Android catalogue</strong><small>Manage Android records</small></span><b>→</b></button><button data-view="windows"><span class="quick-icon windows-stat">▦</span><span><strong>Windows catalogue</strong><small>Manage Windows records</small></span><b>→</b></button></div></article>
