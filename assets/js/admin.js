@@ -25,7 +25,7 @@
   }
   function showDashboard() {
     authScreen.hidden = true; dashboard.hidden = false; document.body.classList.add("dashboard-active");
-    $("preview-notice")?.remove();
+    document.querySelector(".preview-notice")?.remove();
     loadCatalogue();
   }
   function showLogin() {
@@ -130,7 +130,10 @@
     editorKind=kind;editing=item?{...item}:null;fields.replaceChildren();$("editor-error").hidden=true;
     $("editor-title").textContent=(item?"Edit ":"Add ")+(kind==="category"?"category":"record");
     if(kind==="category"){
-      fields.append(inputField("Category ID","id",item?.id||"", "text",true),inputField("Display label","label",item?.label||"","text",true),inputField("JSON filename","file",item?.file||"","text",true));
+      const idField=inputField("Category ID","id",item?.id||"", "text",true);
+      const fileField=inputField("JSON filename","file",item?.file||"","text",true);
+      if(item){idField.querySelector("input").disabled=true;fileField.querySelector("input").disabled=true;}
+      fields.append(idField,inputField("Display label","label",item?.label||"","text",true),fileField);
     }else{
       const platform=item?.platform||(currentView==="windows"?"windows":"android");
       const catWrap=inputField("Category","category",item?.category||categoryList()[0]?.id||"","select",true);
