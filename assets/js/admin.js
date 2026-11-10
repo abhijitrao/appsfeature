@@ -13,7 +13,7 @@
     android:["Android catalogue","Applications and tools published for Android.","Android records","Android JSON catalogue."],
     windows:["Windows catalogue","Desktop applications and developer tools.","Windows records","Windows JSON catalogue."]
   };
-  let files = {}, original = {}, dirty = new Set(), currentView = "overview", editing = null, editorKind = "record", authenticated = false, pendingCommit = false;
+  let files = {}, original = {}, dirty = new Set(), currentView = "overview", editing = null, editorKind = "record", authenticated = false, pendingCommit = false, selectedBranch = "main";
 
   function message(el, text) { el.textContent = text; el.hidden = false; }
   async function api(path, options = {}) {
@@ -57,6 +57,8 @@
   });
   $("mobile-menu").addEventListener("click",()=>sidebar.classList.toggle("open"));
   $("current-year").textContent=new Date().getFullYear();
+  $("branch-select").value=selectedBranch;
+  $("sidebar-branch").textContent=selectedBranch;
 
   function categoryList(){return files["assets/data/common/categories.json"] || [];}
   function allRecords(){return sources.flatMap(path => (files[path]||[]).map((r,index)=>({...r,_path:path,_index:index})));}
@@ -108,7 +110,7 @@
     refreshButton.disabled=true;refreshButton.textContent="↻ Loading…";
     try{
       if(authenticated){
-        const result=await api("/api/catalogue");files=result.files;
+        const result=await api("/api/catalogue?branch="+encodeURIComponent(selectedBranch));files=result.files;
       } else {
         const paths=["assets/data/common/categories.json",...sources];
         const result=await Promise.all(paths.map(async p=>{const r=await fetch(p+"?v="+Date.now(),{cache:"no-store"});if(!r.ok)throw new Error("Could not load "+p);return [p,await r.json()];}));
@@ -187,6 +189,7 @@
   });
   function showReview(){
     if(!dirty.size)return;
+    $("review-branch").textContent=selectedBranch;
     reviewFiles.replaceChildren();
     [...dirty].forEach(path=>{const li=document.createElement("li");li.innerHTML="<strong></strong><small></small>";li.querySelector("strong").textContent=path;li.querySelector("small").textContent=(original[path]||[]).length+" → "+(files[path]||[]).length+" entries";reviewFiles.append(li);});
     $("review-error").hidden=true;review.showModal();
@@ -194,7 +197,7 @@
   async function commitChanges(){
     $("confirm-commit").disabled=true;$("confirm-commit").textContent="Committing…";
     try{
-      const payload={files:Object.fromEntries([...dirty].map(path=>[path,files[path]])),message:$("commit-message").value};
+      const payload={branch:selectedBranch,files:Object.fromEntries([...dirty].map(path=>[path,files[path]])),message:$("commit-message").value};
       const result=await api("/api/commit",{method:"POST",body:JSON.stringify(payload)});
       review.close();window.alert("Committed successfully to "+result.branch+". Commit: "+result.commit.slice(0,7));
       await loadCatalogue();
@@ -205,6 +208,15 @@
   $("editor-close").addEventListener("click",()=>editor.close());$("editor-cancel").addEventListener("click",()=>editor.close());
   $("review-close").addEventListener("click",()=>review.close());$("review-cancel").addEventListener("click",()=>review.close());
   $("confirm-commit").addEventListener("click",commitChanges);
+  $("branch-select").addEventListener("change", async event=>{
+    const next=event.target.value;
+    if(dirty.size && !window.confirm("Discard uncommitted local changes and switch to "+next+"?")){event.target.value=selectedBranch;return;}
+    selectedBranch=next;
+    $("sidebar-branch").textContent=selectedBranch;
+    $("branch-select").disabled=true;
+    await loadCatalogue();
+    $("branch-select").disabled=false;
+  });
   $("refresh-button").addEventListener("click",loadCatalogue);search.addEventListener("input",render);
   document.querySelectorAll("[data-view]").forEach(b=>b.addEventListener("click",()=>{currentView=b.dataset.view;search.value="";render();sidebar.classList.remove("open");}));
   render();
