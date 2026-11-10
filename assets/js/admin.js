@@ -13,7 +13,7 @@
     android:["Android catalogue","Applications and tools published for Android.","Android records","Android JSON catalogue."],
     windows:["Windows catalogue","Desktop applications and developer tools.","Windows records","Windows JSON catalogue."]
   };
-  let files = {}, original = {}, dirty = new Set(), currentView = "overview", editing = null, editorKind = "record", authenticated = false, pendingCommit = false, selectedBranch = "main", editorScreenshots = [], screenshotUploads = [];
+  let files = {}, original = {}, dirty = new Set(), currentView = "overview", editing = null, editorKind = "record", authenticated = false, pendingCommit = false, selectedBranch = "main", editorScreenshots = [], screenshotUploads = [], screenshotReads = [];
 
   function message(el, text) { el.textContent = text; el.hidden = false; }
   async function api(path, options = {}) {
@@ -166,7 +166,7 @@
     if(!editorScreenshots.length){const empty=document.createElement("small");empty.className="screenshot-empty";empty.textContent="No screenshots selected.";container.append(empty);}
   }
   function openEditor(kind,item=null){
-    editorKind=kind;editing=item?{...item}:null;fields.replaceChildren();$("editor-error").hidden=true;editorScreenshots=kind==="record"&&Array.isArray(item?.screenshots)?[...item.screenshots]:[];screenshotUploads.forEach(file=>URL.revokeObjectURL(file.previewUrl));screenshotUploads=[];
+    editorKind=kind;editing=item?{...item}:null;fields.replaceChildren();$("editor-error").hidden=true;editorScreenshots=kind==="record"&&Array.isArray(item?.screenshots)?[...item.screenshots]:[];screenshotUploads.forEach(file=>URL.revokeObjectURL(file.previewUrl));screenshotUploads=[];screenshotReads=[];
     $("editor-title").textContent=(item?"Edit ":"Add ")+(kind==="category"?"category":"record");
     if(kind==="category"){
       const idField=inputField("Category ID","id",item?.id||"", "text",true);
@@ -196,9 +196,13 @@
           const clean=(file.name||"screenshot").toLowerCase().replace(/[^a-z0-9._-]/g,"-");
           const recordId=($("editor-form").elements.id?.value||"app").toLowerCase().replace(/[^a-z0-9-]/g,"-");
           const name=(recordId+"-"+Date.now()+"-"+clean).slice(0,120);
-          const reader=new FileReader();
-          reader.onload=()=>{const base64=String(reader.result).split(",")[1];const previewUrl=URL.createObjectURL(file);screenshotUploads.push({name,base64,previewUrl});editorScreenshots.push(name);renderScreenshotPreviews(preview);};
-          reader.readAsDataURL(file);
+          const task=new Promise((resolve,reject)=>{
+            const reader=new FileReader();
+            reader.onload=()=>{const base64=String(reader.result).split(",")[1];const previewUrl=URL.createObjectURL(file);screenshotUploads.push({name,base64,previewUrl});editorScreenshots.push(name);renderScreenshotPreviews(preview);resolve();};
+            reader.onerror=()=>reject(new Error("Unable to read "+file.name));
+            reader.readAsDataURL(file);
+          });
+          screenshotReads.push(task);
         });
         picker.value="";
       });
@@ -218,8 +222,10 @@
     }
     render();
   }
-  editorForm.addEventListener("submit",event=>{
-    event.preventDefault();const data=Object.fromEntries(new FormData(editorForm).entries());
+  editorForm.addEventListener("submit",async event=>{
+    event.preventDefault();
+    try{await Promise.all(screenshotReads);}catch(error){message($("editor-error"),error.message);return;}
+    const data=Object.fromEntries(new FormData(editorForm).entries());
     try{
       if(editorKind==="category"){
         const list=[...categoryList()];if(!/^[a-z0-9-]+$/.test(data.id))throw new Error("Category ID may contain lowercase letters, numbers and hyphens only.");
