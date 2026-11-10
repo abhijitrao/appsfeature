@@ -60,7 +60,7 @@ export async function onRequestPost({ request, env }) {
         for (const record of records) {
           if (!Array.isArray(record.screenshots)) continue;
           for (const name of record.screenshots) {
-            if (typeof name === "string" && /^[a-z0-9][a-z0-9._-]{0,120}\\.(png|jpe?g|webp)$/i.test(name)) names.add(name);
+            if (typeof name === "string" && /^[a-z0-9][a-z0-9._-]{0,120}\.(png|jpe?g|webp)$/i.test(name)) names.add(name);
           }
         }
       }
