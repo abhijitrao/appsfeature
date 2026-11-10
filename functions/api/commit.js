@@ -43,6 +43,34 @@ export async function onRequestPost({ request, env }) {
     }
     const ref = await github("/repos/" + REPO + "/git/ref/heads/" + branch, env);
     const parent = await github("/repos/" + REPO + "/git/commits/" + ref.object.sha, env);
+
+    // Compare screenshot references across every catalogue so shared images are never deleted.
+    const cataloguePaths = CATALOGUE_PATHS.filter(path => !path.endsWith("/categories.json"));
+    const currentCatalogues = await Promise.all(cataloguePaths.map(async path => {
+      const response = await github("/repos/" + REPO + "/contents/" + path + "?ref=" + branch, env);
+      const binary = atob(response.content.replace(/\\n/g, ""));
+      return [path, JSON.parse(new TextDecoder().decode(Uint8Array.from(binary, c => c.charCodeAt(0))))];
+    }));
+    const mergedCatalogues = new Map(currentCatalogues);
+    for (const [path, data] of entries) if (mergedCatalogues.has(path)) mergedCatalogues.set(path, data);
+
+    const collectScreenshotNames = catalogues => {
+      const names = new Set();
+      for (const records of catalogues.values()) {
+        for (const record of records) {
+          if (!Array.isArray(record.screenshots)) continue;
+          for (const name of record.screenshots) {
+            if (typeof name === "string" && /^[a-z0-9][a-z0-9._-]{0,120}\\.(png|jpe?g|webp)$/i.test(name)) names.add(name);
+          }
+        }
+      }
+      return names;
+    };
+    const oldScreenshotNames = collectScreenshotNames(new Map(currentCatalogues));
+    const newScreenshotNames = collectScreenshotNames(mergedCatalogues);
+    const uploadedNames = new Set(screenshots.map(item => item.name));
+    const deletedScreenshotNames = [...oldScreenshotNames].filter(name => !newScreenshotNames.has(name) && !uploadedNames.has(name));
+
     const imageEntries = [];
     for (const item of screenshots) {
       const blob = await github("/repos/" + REPO + "/git/blobs", env, {
@@ -56,9 +84,15 @@ export async function onRequestPost({ request, env }) {
       headers: { "content-type": "application/json" },
       body: JSON.stringify({
         base_tree: parent.tree.sha,
-        tree: [...entries.map(([path, data]) => ({
-          path, mode: "100644", type: "blob", content: JSON.stringify(data, null, 2) + "\n"
-        })), ...imageEntries]
+        tree: [
+          ...entries.map(([path, data]) => ({
+            path, mode: "100644", type: "blob", content: JSON.stringify(data, null, 2) + "\n"
+          })),
+          ...imageEntries,
+          ...deletedScreenshotNames.map(name => ({
+            path: "assets/images/screenshots/" + name, mode: "100644", type: "blob", sha: null
+          }))
+        ]
       })
     });
     const commit = await github("/repos/" + REPO + "/git/commits", env, {
@@ -71,6 +105,6 @@ export async function onRequestPost({ request, env }) {
       headers: { "content-type": "application/json" },
       body: JSON.stringify({ sha: commit.sha, force: false })
     });
-    return reply({ ok: true, branch, commit: commit.sha, files: [...entries.map(([path]) => path), ...imageEntries.map(item => item.path)] });
+    return reply({ ok: true, branch, commit: commit.sha, files: [...entries.map(([path]) => path), ...imageEntries.map(item => item.path)], deletedScreenshots: deletedScreenshotNames.map(name => "assets/images/screenshots/" + name) });
   } catch (error) { return fail(error.message, 502); }
 }
