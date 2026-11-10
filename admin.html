@@ -63,7 +63,7 @@
       <button class="side-link" data-view="android"><span class="side-icon android-symbol">◉</span> Android <span class="side-count" id="nav-android-count">1</span></button>
       <button class="side-link" data-view="windows"><span class="side-icon windows-symbol">▦</span> Windows <span class="side-count" id="nav-windows-count">1</span></button>
       <div class="sidebar-bottom">
-        <div class="branch-card"><span class="branch-dot"></span><div><small>ACTIVE BRANCH</small><strong>feature-admin</strong></div></div>
+        <div class="branch-card"><span class="branch-dot"></span><div><small>ACTIVE BRANCH</small><strong id="sidebar-branch">main</strong></div></div>
         <button class="side-link logout-link" id="logout-button"><span class="side-icon">↪</span> Sign out</button>
       </div>
     </aside>
@@ -78,7 +78,7 @@
       <div class="page-content">
         <section class="page-heading">
           <div><p class="eyebrow">APPSFEATURE CONTROL CENTER</p><h1 id="page-title">Overview<span class="heading-period">.</span></h1><p id="page-description">A quick view of your application catalogue and content.</p></div>
-          <div class="heading-actions"><span class="branch-label"><span>⑂</span> feature-admin</span><button class="secondary-button" id="refresh-button" type="button">↻ Refresh</button></div>
+          <div class="heading-actions"><label class="branch-picker"><span>⑂ Branch</span><select id="branch-select" aria-label="Git branch"><option value="main" selected>main · Production</option><option value="feature-admin">feature-admin · Development</option></select></label><button class="secondary-button" id="refresh-button" type="button">↻ Refresh</button></div>
         </section>
 
         <section class="stats-grid" aria-label="Catalogue summary">
@@ -95,7 +95,7 @@
         </section>
         <section class="bottom-grid">
           <article class="content-panel quick-panel"><div class="panel-heading"><div><h2>Quick access</h2><p>Jump to a catalogue section.</p></div></div><div class="quick-links"><button data-view="categories"><span class="quick-icon">◇</span><span><strong>Manage categories</strong><small>Review catalogue groups</small></span><b>→</b></button><button data-view="android"><span class="quick-icon android-stat">◉</span><span><strong>Android catalogue</strong><small>Manage Android records</small></span><b>→</b></button><button data-view="windows"><span class="quick-icon windows-stat">▦</span><span><strong>Windows catalogue</strong><small>Manage Windows records</small></span><b>→</b></button></div></article>
-          <article class="content-panel workflow-panel"><div class="panel-heading"><div><h2>Publishing workflow</h2><p>Changes will follow this approval path.</p></div></div><ol class="workflow-list"><li><span>1</span><div><strong>Edit catalogue</strong><small>Add, update or remove records</small></div><em>Planned</em></li><li><span>2</span><div><strong>Validate & review</strong><small>Compare changes before saving</small></div><em>Planned</em></li><li><span>3</span><div><strong>Commit to GitHub</strong><small>Publish to feature-admin only</small></div><em>Planned</em></li></ol></article>
+          <article class="content-panel workflow-panel"><div class="panel-heading"><div><h2>Publishing workflow</h2><p>Changes will follow this approval path.</p></div></div><ol class="workflow-list"><li><span>1</span><div><strong>Edit catalogue</strong><small>Add, update or remove records</small></div><em>Planned</em></li><li><span>2</span><div><strong>Validate & review</strong><small>Compare changes before saving</small></div><em>Planned</em></li><li><span>3</span><div><strong>Commit to GitHub</strong><small>Commit to selected branch</small></div><em>Planned</em></li></ol></article>
         </section>
         <footer class="dashboard-footer"><span>© <span id="current-year"></span> AppsFeature Admin Console</span><span>Built with care <b>✦</b></span></footer>
       </div>
@@ -112,7 +112,7 @@
   </dialog>
   <dialog class="editor-dialog review-dialog" id="review-dialog">
     <div class="dialog-heading"><div><p class="eyebrow">FINAL REVIEW</p><h2>Confirm catalogue changes</h2></div><button class="icon-button" type="button" id="review-close" aria-label="Close">×</button></div>
-    <p class="review-copy">The following JSON files will be committed to <strong>feature-admin</strong>. Production branch <strong>main</strong> will not be changed.</p>
+    <p class="review-copy">The following JSON files will be committed to <strong id="review-branch">main</strong>.</p>
     <ul id="review-files" class="review-files"></ul>
     <label class="field-label" for="commit-message">Commit message</label><input id="commit-message" class="editor-input" maxlength="120" value="Update application catalogue">
     <p class="form-error" id="review-error" role="alert" hidden></p>
