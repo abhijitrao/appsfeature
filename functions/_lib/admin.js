@@ -1,0 +1,138 @@
+const ALLOWED_BRANCHES = ["main", "feature-admin"];
+export function resolveBranch(value) {
+  const branch = value || "main";
+  if (!ALLOWED_BRANCHES.includes(branch)) throw new Error("Selected branch is not allowed.");
+  return branch;
+}
+const REPO = "abhijitrao/appsfeature";
+export const CATALOGUE_PATHS = [
+  "assets/data/common/categories.json",
+  "assets/data/android/apps.json",
+  "assets/data/android/utilities.json",
+  "assets/data/android/developer-tools.json",
+  "assets/data/windows/apps.json",
+  "assets/data/windows/utilities.json",
+  "assets/data/windows/developer-tools.json"
+];
+const encoder = new TextEncoder();
+const decoder = new TextDecoder();
+const SESSION_TTL = 8 * 60 * 60;
+
+export function reply(data, status = 200, extra = {}) {
+  return new Response(JSON.stringify(data), {
+    status,
+    headers: { "content-type": "application/json; charset=utf-8", "cache-control": "no-store", "x-content-type-options": "nosniff", "x-frame-options": "DENY", "referrer-policy": "no-referrer", "permissions-policy": "camera=(), microphone=(), geolocation=()", "cross-origin-resource-policy": "same-origin", ...extra }
+  });
+}
+export function fail(message, status = 400, extra = {}) { return reply({ error: message }, status, extra); }
+export function cookieValue(request, name) {
+  const raw = request.headers.get("Cookie") || "";
+  const item = raw.split(";").map(v => v.trim()).find(v => v.startsWith(name + "="));
+  return item ? item.slice(name.length + 1) : "";
+}
+function b64url(bytes) {
+  let binary = "";
+  for (const byte of bytes) binary += String.fromCharCode(byte);
+  return btoa(binary).replace(/=/g, "").replace(/\+/g, "-").replace(/\//g, "_");
+}
+function fromB64url(value) {
+  const normal = value.replace(/-/g, "+").replace(/_/g, "/");
+  const binary = atob(normal + "=".repeat((4 - normal.length % 4) % 4));
+  return Uint8Array.from(binary, c => c.charCodeAt(0));
+}
+async function hmac(value, secret) {
+  const key = await crypto.subtle.importKey("raw", encoder.encode(secret), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
+  return b64url(new Uint8Array(await crypto.subtle.sign("HMAC", key, encoder.encode(value))));
+}
+function constantEqual(a, b) {
+  if (typeof a !== "string" || typeof b !== "string" || a.length !== b.length) return false;
+  let diff = 0;
+  for (let i = 0; i < a.length; i++) diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  return diff === 0;
+}
+async function readSession(request, env) {
+  if (!env.SESSION_SECRET) return null;
+  const token = cookieValue(request, "af_admin");
+  const [payload, signature, extra] = token.split(".");
+  if (!payload || !signature || extra || !constantEqual(signature, await hmac(payload, env.SESSION_SECRET))) return null;
+  try {
+    const session = JSON.parse(decoder.decode(fromB64url(payload)));
+    if (!Number.isFinite(session.exp) || session.exp <= Date.now() || typeof session.nonce !== "string") return null;
+    return session;
+  } catch (_) { return null; }
+}
+export async function createSession(env) {
+  if (!env.ADMIN_SECURITY) throw new Error("Admin security KV binding is not configured.");
+  const session = { exp: Date.now() + SESSION_TTL * 1000, nonce: crypto.randomUUID() };
+  const payload = b64url(encoder.encode(JSON.stringify(session)));
+  const token = payload + "." + await hmac(payload, env.SESSION_SECRET);
+  await env.ADMIN_SECURITY.put("session:" + session.nonce, "active", { expirationTtl: SESSION_TTL });
+  return token;
+}
+export async function isAuthenticated(request, env) {
+  if (!env.ADMIN_SECURITY) return false;
+  const session = await readSession(request, env);
+  if (!session) return false;
+  return await env.ADMIN_SECURITY.get("session:" + session.nonce) === "active";
+}
+export async function revokeSession(request, env) {
+  if (!env.ADMIN_SECURITY) return;
+  const session = await readSession(request, env);
+  if (session) await env.ADMIN_SECURITY.delete("session:" + session.nonce);
+}
+export async function loginAttemptKey(request) {
+  const ip = request.headers.get("CF-Connecting-IP") || "unknown";
+  const digest = await crypto.subtle.digest("SHA-256", encoder.encode(ip));
+  return "login-attempts:" + b64url(new Uint8Array(digest));
+}
+export function sessionCookie(value) {
+  return "af_admin=" + value + "; Path=/; Max-Age=28800; HttpOnly; Secure; SameSite=Strict";
+}
+export function clearSessionCookie() {
+  return "af_admin=; Path=/; Max-Age=0; HttpOnly; Secure; SameSite=Strict";
+}
+export function sameOrigin(request) {
+  const origin = request.headers.get("Origin");
+  if (!origin) return false;
+  try { return new URL(origin).host === new URL(request.url).host; } catch (_) { return false; }
+}
+export async function github(path, env, options = {}) {
+  if (!env.GITHUB_TOKEN) throw new Error("GitHub token is not configured in Cloudflare secrets.");
+  const response = await fetch("https://api.github.com" + path, {
+    ...options,
+    headers: {
+      "Authorization": "Bearer " + env.GITHUB_TOKEN,
+      "Accept": "application/vnd.github+json",
+      "X-GitHub-Api-Version": "2022-11-28",
+      "User-Agent": "AppsFeature-Admin",
+      ...(options.headers || {})
+    }
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(data.message || "GitHub API request failed (" + response.status + ").");
+  return data;
+}
+export function validateCatalogue(path, data) {
+  if (!CATALOGUE_PATHS.includes(path)) throw new Error("This catalogue file is not allowed.");
+  if (!Array.isArray(data)) throw new Error(path + " must contain a JSON array.");
+  if (path.endsWith("categories.json")) {
+    const ids = new Set();
+    for (const item of data) {
+      if (!item || typeof item.id !== "string" || typeof item.label !== "string" || typeof item.file !== "string") throw new Error("Each category needs id, label and file.");
+      if (ids.has(item.id)) throw new Error("Duplicate category id: " + item.id);
+      if (!["apps.json", "utilities.json", "developer-tools.json"].includes(item.file)) throw new Error("Category file must be one of the approved catalogue JSON files.");
+      ids.add(item.id);
+    }
+    return;
+  }
+  const ids = new Set();
+  for (const item of data) {
+    if (!item || typeof item !== "object" || Array.isArray(item)) throw new Error(path + " contains an invalid record.");
+    for (const key of ["id", "name", "platform", "category"]) if (typeof item[key] !== "string" || !item[key].trim()) throw new Error(path + ": every record needs " + key + ".");
+    const platform = path.includes("/android/") ? "android" : "windows";
+    if (item.platform !== platform) throw new Error(path + ": record platform must be " + platform + ".");
+    if (ids.has(item.id)) throw new Error(path + ": duplicate record id " + item.id + ".");
+    ids.add(item.id);
+  }
+}
+export { REPO };

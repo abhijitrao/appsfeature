@@ -4,7 +4,7 @@
     "name": "DroidShare WiFi",
     "platform": "android",
     "category": "utility",
-    "version": "In development",
+    "version": "1.0-alpha01",
     "description": "A Wi-Fi file transfer app for moving files between Android devices and computers.",
     "icon": "DS",
     "status": "In development",

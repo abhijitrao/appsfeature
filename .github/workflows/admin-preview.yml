@@ -1,0 +1,74 @@
+# Cloudflare Pages watches feature-admin for browser-based Admin Panel previews.
+name: Admin Panel Preview
+
+on:
+  push:
+    branches:
+      - feature-admin
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: admin-preview
+  cancel-in-progress: true
+
+jobs:
+  package-preview:
+    name: Package feature-admin preview
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout feature-admin
+        uses: actions/checkout@v4
+        with:
+          ref: feature-admin
+
+      - name: Validate Admin Panel files
+        run: |
+          test -f admin.html
+          test -f assets/css/admin.css
+          test -f assets/js/admin.js
+
+      - name: Validate JavaScript syntax
+        run: node --check assets/js/admin.js
+
+      - name: Validate Cloudflare Pages Functions syntax
+        run: |
+          for file in functions/_lib/admin.js functions/api/auth/login.js functions/api/auth/logout.js functions/api/auth/me.js functions/api/catalogue.js functions/api/commit.js; do
+            node --input-type=module --check < "$file"
+          done
+
+      - name: Validate catalogue JSON
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          files = [
+              "assets/data/common/categories.json",
+              "assets/data/android/apps.json",
+              "assets/data/android/utilities.json",
+              "assets/data/android/developer-tools.json",
+              "assets/data/windows/apps.json",
+              "assets/data/windows/utilities.json",
+              "assets/data/windows/developer-tools.json",
+          ]
+          for file in files:
+              with Path(file).open(encoding="utf-8") as source:
+                  value = json.load(source)
+              if not isinstance(value, list):
+                  raise SystemExit(f"{file} must contain a JSON array")
+              print(f"Valid: {file}")
+          PY
+
+      - name: Upload preview package
+        uses: actions/upload-artifact@v4
+        with:
+          name: appsfeature-admin-preview-${{ github.sha }}
+          path: |
+            ./
+            !./.git/**
+            !./.github/**
+          if-no-files-found: error
+          retention-days: 7
