@@ -59,9 +59,9 @@
       <div class="sidebar-label">WORKSPACE</div>
       <button class="side-link active" data-view="overview"><span class="side-icon">▦</span> Overview</button>
       <div class="sidebar-label section-label">CATALOGUE</div>
-      <button class="side-link" data-view="categories"><span class="side-icon">◇</span> Categories <span class="side-count">3</span></button>
-      <button class="side-link" data-view="android"><span class="side-icon android-symbol">◉</span> Android <span class="side-count">1</span></button>
-      <button class="side-link" data-view="windows"><span class="side-icon windows-symbol">▦</span> Windows <span class="side-count">1</span></button>
+      <button class="side-link" data-view="categories"><span class="side-icon">◇</span> Categories <span class="side-count" id="nav-category-count">3</span></button>
+      <button class="side-link" data-view="android"><span class="side-icon android-symbol">◉</span> Android <span class="side-count" id="nav-android-count">1</span></button>
+      <button class="side-link" data-view="windows"><span class="side-icon windows-symbol">▦</span> Windows <span class="side-count" id="nav-windows-count">1</span></button>
       <div class="sidebar-bottom">
         <div class="branch-card"><span class="branch-dot"></span><div><small>ACTIVE BRANCH</small><strong>feature-admin</strong></div></div>
         <button class="side-link logout-link" id="logout-button"><span class="side-icon">↪</span> Sign out</button>
@@ -82,18 +82,15 @@
         </section>
 
         <section class="stats-grid" aria-label="Catalogue summary">
-          <article class="stat-card"><div class="stat-top"><span>Total records</span><span class="stat-icon">▤</span></div><strong>2</strong><small><i class="positive-dot"></i> Across Android & Windows</small></article>
-          <article class="stat-card"><div class="stat-top"><span>Categories</span><span class="stat-icon">◇</span></div><strong>3</strong><small>Utilities · Developer tools · General apps</small></article>
-          <article class="stat-card"><div class="stat-top"><span>Android records</span><span class="stat-icon android-stat">◉</span></div><strong>1</strong><small>Application catalogue</small></article>
-          <article class="stat-card"><div class="stat-top"><span>Windows records</span><span class="stat-icon windows-stat">▦</span></div><strong>1</strong><small>Desktop software catalogue</small></article>
+          <article class="stat-card"><div class="stat-top"><span>Total records</span><span class="stat-icon">▤</span></div><strong id="stat-total">2</strong><small><i class="positive-dot"></i> Across Android & Windows</small></article>
+          <article class="stat-card"><div class="stat-top"><span>Categories</span><span class="stat-icon">◇</span></div><strong id="stat-categories">3</strong><small>Utilities · Developer tools · General apps</small></article>
+          <article class="stat-card"><div class="stat-top"><span>Android records</span><span class="stat-icon android-stat">◉</span></div><strong id="stat-android">1</strong><small>Application catalogue</small></article>
+          <article class="stat-card"><div class="stat-top"><span>Windows records</span><span class="stat-icon windows-stat">▦</span></div><strong id="stat-windows">1</strong><small>Desktop software catalogue</small></article>
         </section>
 
         <section class="content-panel">
           <div class="panel-heading"><div><h2 id="table-title">Catalogue snapshot</h2><p id="table-description">Existing entries currently tracked in the website JSON files.</p></div><div class="panel-tools"><label class="table-search"><span>⌕</span><input id="record-search" type="search" placeholder="Search records..." aria-label="Search records"></label><button class="primary-button add-button" id="add-record" type="button" disabled>＋ Add record</button></div></div>
-          <div class="table-scroll"><table><thead><tr><th>APPLICATION</th><th>PLATFORM</th><th>CATEGORY</th><th>VERSION / STATUS</th><th>DETAILS</th></tr></thead><tbody id="records-body">
-            <tr><td><div class="record-name"><span class="record-avatar">DS</span><span><strong>DroidShare WiFi</strong><small>droidshare-wifi</small></span></div></td><td><span class="platform-tag android-tag">Android</span></td><td>Utilities</td><td><span class="status-tag in-progress">In development</span></td><td><a href="https://github.com/abhijitrao/DroidShare-WiFi" target="_blank" rel="noreferrer">GitHub ↗</a></td></tr>
-            <tr><td><div class="record-name"><span class="record-avatar windows-avatar">NS</span><span><strong>Network Simulator</strong><small>network-simulator</small></span></div></td><td><span class="platform-tag windows-tag">Windows</span></td><td>Developer tools</td><td><span class="status-tag published">Version 1.0</span></td><td><a href="https://github.com/abhijitrao/NetworkSimulator" target="_blank" rel="noreferrer">GitHub ↗</a></td></tr>
-          </tbody></table></div>
+          <div class="table-scroll"><table><thead><tr id="records-header"><th>APPLICATION</th><th>PLATFORM</th><th>CATEGORY</th><th>VERSION / STATUS</th><th>DETAILS</th></tr></thead><tbody id="records-body"></tbody></table></div>
           <div class="table-footer"><span>Showing 2 current records from the JSON catalogue</span><span>Source: <code>assets/data/</code></span></div>
         </section>
         <section class="bottom-grid">
