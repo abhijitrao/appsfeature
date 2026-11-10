@@ -1,4 +1,4 @@
-import { reply, fail, isAuthenticated, sameOrigin, CATALOGUE_PATHS, validateCatalogue, github, REPO, BRANCH } from "../_lib/admin.js";
+import { reply, fail, isAuthenticated, sameOrigin, CATALOGUE_PATHS, validateCatalogue, github, REPO, resolveBranch } from "../_lib/admin.js";
 export async function onRequestPost({ request, env }) {
   if (!sameOrigin(request)) return fail("Request origin rejected.", 403);
   if (!await isAuthenticated(request, env)) return fail("Authentication required.", 401);
@@ -7,6 +7,8 @@ export async function onRequestPost({ request, env }) {
   let body;
   try { body = await request.json(); } catch (_) { return fail("Invalid JSON request."); }
   if (!body || typeof body.files !== "object" || Array.isArray(body.files)) return fail("No catalogue changes supplied.");
+  let branch;
+  try { branch = resolveBranch(body.branch); } catch (error) { return fail(error.message, 400); }
   const entries = Object.entries(body.files);
   if (!entries.length || entries.length > CATALOGUE_PATHS.length) return fail("Invalid number of changed files.");
   try {
@@ -15,7 +17,7 @@ export async function onRequestPost({ request, env }) {
     const categoryResponse = entries.find(([path]) => path === categoriesPath);
     let categories = categoryResponse ? categoryResponse[1] : null;
     if (!categories) {
-      const current = await github("/repos/" + REPO + "/contents/" + categoriesPath + "?ref=" + BRANCH, env);
+      const current = await github("/repos/" + REPO + "/contents/" + categoriesPath + "?ref=" + branch, env);
       const binary = atob(current.content.replace(/\\n/g, ""));
       categories = JSON.parse(new TextDecoder().decode(Uint8Array.from(binary, c => c.charCodeAt(0))));
     }
@@ -31,7 +33,7 @@ export async function onRequestPost({ request, env }) {
         if (record.platform !== platform) throw new Error("Record platform does not match its destination JSON file.");
       }
     }
-    const ref = await github("/repos/" + REPO + "/git/ref/heads/" + BRANCH, env);
+    const ref = await github("/repos/" + REPO + "/git/ref/heads/" + branch, env);
     const parent = await github("/repos/" + REPO + "/git/commits/" + ref.object.sha, env);
     const tree = await github("/repos/" + REPO + "/git/trees", env, {
       method: "POST",
@@ -53,6 +55,6 @@ export async function onRequestPost({ request, env }) {
       headers: { "content-type": "application/json" },
       body: JSON.stringify({ sha: commit.sha, force: false })
     });
-    return reply({ ok: true, branch: BRANCH, commit: commit.sha, files: entries.map(([path]) => path) });
+    return reply({ ok: true, branch, commit: commit.sha, files: entries.map(([path]) => path) });
   } catch (error) { return fail(error.message, 502); }
 }
