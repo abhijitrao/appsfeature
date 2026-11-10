@@ -33,6 +33,12 @@ jobs:
       - name: Validate JavaScript syntax
         run: node --check assets/js/admin.js
 
+      - name: Validate Cloudflare Pages Functions syntax
+        run: |
+          for file in functions/_lib/admin.js functions/api/auth/login.js functions/api/auth/logout.js functions/api/auth/me.js functions/api/catalogue.js functions/api/commit.js; do
+            node --input-type=module --check < "$file"
+          done
+
       - name: Validate catalogue JSON
         run: |
           python - <<'PY'
