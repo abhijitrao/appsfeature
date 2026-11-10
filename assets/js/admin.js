@@ -52,7 +52,14 @@
     $("toggle-password").setAttribute("aria-label",reveal?"Hide password":"Show password");
   });
   $("logout-button").addEventListener("click", async () => {
-    if (authenticated) { try { await api("/api/auth/logout",{method:"POST"}); } catch (_) {} }
+    if (authenticated) {
+      try {
+        await api("/api/auth/logout",{method:"POST"});
+      } catch (error) {
+        window.alert("Sign out could not be completed: " + error.message + ". Your admin session is still active; please retry.");
+        return;
+      }
+    }
     showLogin();
   });
   $("mobile-menu").addEventListener("click",()=>sidebar.classList.toggle("open"));
