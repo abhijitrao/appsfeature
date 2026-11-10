@@ -1,3 +1,4 @@
+# Cloudflare Pages watches feature-admin for browser-based Admin Panel previews.
 name: Admin Panel Preview
 
 on:
