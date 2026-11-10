@@ -3,13 +3,21 @@ export async function onRequestPost({ request, env }) {
   if (!sameOrigin(request)) return fail("Request origin rejected.", 403);
   if (!await isAuthenticated(request, env)) return fail("Authentication required.", 401);
   const length = Number(request.headers.get("Content-Length") || 0);
-  if (length > 200000) return fail("Request is too large.", 413);
+  if (length > 9 * 1024 * 1024) return fail("Request is too large.", 413);
   let body;
   try { body = await request.json(); } catch (_) { return fail("Invalid JSON request."); }
   if (!body || typeof body.files !== "object" || Array.isArray(body.files)) return fail("No catalogue changes supplied.");
   let branch;
   try { branch = resolveBranch(body.branch); } catch (error) { return fail(error.message, 400); }
   const entries = Object.entries(body.files);
+  const screenshots = Array.isArray(body.screenshots) ? body.screenshots : [];
+  if (screenshots.length > 12) return fail("You can upload up to 12 screenshots per commit.", 413);
+  let screenshotBytes = 0;
+  for (const item of screenshots) {
+    if (!item || typeof item.name !== "string" || !/^[a-z0-9][a-z0-9._-]{0,120}\.(png|jpe?g|webp)$/i.test(item.name) || typeof item.base64 !== "string" || !/^[A-Za-z0-9+/]+={0,2}$/.test(item.base64)) return fail("Invalid screenshot upload.", 400);
+    screenshotBytes += Math.floor(item.base64.length * 3 / 4);
+    if (screenshotBytes > 6 * 1024 * 1024) return fail("Screenshots must total 6 MB or less per commit.", 413);
+  }
   if (!entries.length || entries.length > CATALOGUE_PATHS.length) return fail("Invalid number of changed files.");
   try {
     for (const [path, data] of entries) validateCatalogue(path, data);
@@ -35,14 +43,22 @@ export async function onRequestPost({ request, env }) {
     }
     const ref = await github("/repos/" + REPO + "/git/ref/heads/" + branch, env);
     const parent = await github("/repos/" + REPO + "/git/commits/" + ref.object.sha, env);
+    const imageEntries = [];
+    for (const item of screenshots) {
+      const blob = await github("/repos/" + REPO + "/git/blobs", env, {
+        method: "POST", headers: { "content-type": "application/json" },
+        body: JSON.stringify({ content: item.base64, encoding: "base64" })
+      });
+      imageEntries.push({ path: "assets/images/screenshots/" + item.name, mode: "100644", type: "blob", sha: blob.sha });
+    }
     const tree = await github("/repos/" + REPO + "/git/trees", env, {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({
         base_tree: parent.tree.sha,
-        tree: entries.map(([path, data]) => ({
+        tree: [...entries.map(([path, data]) => ({
           path, mode: "100644", type: "blob", content: JSON.stringify(data, null, 2) + "\n"
-        }))
+        })), ...imageEntries]
       })
     });
     const commit = await github("/repos/" + REPO + "/git/commits", env, {
@@ -55,6 +71,6 @@ export async function onRequestPost({ request, env }) {
       headers: { "content-type": "application/json" },
       body: JSON.stringify({ sha: commit.sha, force: false })
     });
-    return reply({ ok: true, branch, commit: commit.sha, files: entries.map(([path]) => path) });
+    return reply({ ok: true, branch, commit: commit.sha, files: [...entries.map(([path]) => path), ...imageEntries.map(item => item.path)] });
   } catch (error) { return fail(error.message, 502); }
 }
