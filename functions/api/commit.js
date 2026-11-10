@@ -50,7 +50,7 @@ export async function onRequestPost({ request, env }) {
       headers: { "content-type": "application/json" },
       body: JSON.stringify({ message: typeof body.message === "string" && body.message.trim() ? body.message.trim().slice(0, 120) : "Update catalogue via AppsFeature Admin", tree: tree.sha, parents: [parent.sha] })
     });
-    await github("/repos/" + REPO + "/git/refs/heads/" + BRANCH, env, {
+    await github("/repos/" + REPO + "/git/refs/heads/" + branch, env, {
       method: "PATCH",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({ sha: commit.sha, force: false })
