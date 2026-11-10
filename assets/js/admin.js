@@ -1,246 +1,207 @@
 (() => {
-  const authScreen = document.getElementById('auth-screen');
-  const dashboard = document.getElementById('dashboard-screen');
-  const loginForm = document.getElementById('login-form');
-  const password = document.getElementById('admin-password');
-  const authError = document.getElementById('auth-error');
-  const togglePassword = document.getElementById('toggle-password');
-  const logoutButton = document.getElementById('logout-button');
-  const sidebar = document.getElementById('sidebar');
-  const mobileMenu = document.getElementById('mobile-menu');
-  const search = document.getElementById('record-search');
-  const tbody = document.getElementById('records-body');
-  const header = document.getElementById('records-header');
-  const navItems = [...document.querySelectorAll('[data-view]')];
-  const title = document.getElementById('page-title');
-  const description = document.getElementById('page-description');
-  const breadcrumb = document.getElementById('breadcrumb-current');
-  const tableTitle = document.getElementById('table-title');
-  const tableDescription = document.getElementById('table-description');
-  const refreshButton = document.getElementById('refresh-button');
-  const footerCount = document.querySelector('.table-footer > span:first-child');
-
-  const views = {
-    overview: ['Overview', 'A quick view of your application catalogue and content.', 'Catalogue snapshot', 'Live entries loaded from the website JSON files.'],
-    categories: ['Categories', 'Review the groups used to organise your application catalogue.', 'Catalogue categories', 'Categories and their record counts from categories.json.'],
-    android: ['Android catalogue', 'Applications and tools published for Android.', 'Android records', 'Live records loaded from the Android JSON catalogue.'],
-    windows: ['Windows catalogue', 'Desktop applications and developer tools.', 'Windows records', 'Live records loaded from the Windows JSON catalogue.']
+  const $ = id => document.getElementById(id);
+  const authScreen = $("auth-screen"), dashboard = $("dashboard-screen");
+  const loginForm = $("login-form"), password = $("admin-password"), authError = $("auth-error");
+  const sidebar = $("sidebar"), search = $("record-search"), tbody = $("records-body"), header = $("records-header");
+  const refreshButton = $("refresh-button"), footerCount = document.querySelector(".table-footer > span:first-child");
+  const editor = $("editor-dialog"), editorForm = $("editor-form"), fields = $("editor-fields");
+  const review = $("review-dialog"), reviewFiles = $("review-files");
+  const sources = ["assets/data/android/apps.json","assets/data/android/utilities.json","assets/data/android/developer-tools.json","assets/data/windows/apps.json","assets/data/windows/utilities.json","assets/data/windows/developer-tools.json"];
+  const titles = {
+    overview:["Overview","A quick view of your application catalogue and content.","Catalogue snapshot","All catalogue entries."],
+    categories:["Categories","Manage the groups used to organise applications.","Catalogue categories","Categories from categories.json."],
+    android:["Android catalogue","Applications and tools published for Android.","Android records","Android JSON catalogue."],
+    windows:["Windows catalogue","Desktop applications and developer tools.","Windows records","Windows JSON catalogue."]
   };
-  const headers = {
-    records: ['APPLICATION', 'PLATFORM', 'CATEGORY', 'VERSION / STATUS', 'DETAILS'],
-    categories: ['CATEGORY', 'CATEGORY ID', 'JSON FILE', 'RECORDS', 'PLATFORM FILES']
-  };
-  const sources = [
-    ['android', 'apps', 'assets/data/android/apps.json'],
-    ['android', 'utilities', 'assets/data/android/utilities.json'],
-    ['android', 'developer-tools', 'assets/data/android/developer-tools.json'],
-    ['windows', 'apps', 'assets/data/windows/apps.json'],
-    ['windows', 'utilities', 'assets/data/windows/utilities.json'],
-    ['windows', 'developer-tools', 'assets/data/windows/developer-tools.json']
-  ];
-  let categories = [];
-  let records = [];
-  let currentView = 'overview';
-  let loaded = false;
+  let files = {}, original = {}, dirty = new Set(), currentView = "overview", editing = null, editorKind = "record", authenticated = false, pendingCommit = false;
 
+  function message(el, text) { el.textContent = text; el.hidden = false; }
+  async function api(path, options = {}) {
+    const response = await fetch(path, { credentials:"same-origin", cache:"no-store", ...options,
+      headers:{ ...(options.body ? {"content-type":"application/json"} : {}), ...(options.headers || {}) } });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(data.error || "Request failed (" + response.status + ").");
+    return data;
+  }
   function showDashboard() {
-    authScreen.hidden = true;
-    dashboard.hidden = false;
-    document.body.classList.add('dashboard-active');
-    if (!loaded) loadCatalogue();
+    authScreen.hidden = true; dashboard.hidden = false; document.body.classList.add("dashboard-active");
+    $("preview-notice")?.remove();
+    loadCatalogue();
   }
   function showLogin() {
-    dashboard.hidden = true;
-    authScreen.hidden = false;
-    document.body.classList.remove('dashboard-active');
-    password.value = '';
-    authError.hidden = true;
-    password.focus();
+    dashboard.hidden = true; authScreen.hidden = false; document.body.classList.remove("dashboard-active");
+    authenticated = false; password.value = ""; authError.hidden = true;
   }
-  loginForm.addEventListener('submit', event => {
-    event.preventDefault();
-    if (!password.value.trim()) {
-      authError.textContent = 'Please enter your admin password.';
-      authError.hidden = false;
-      password.focus();
-      return;
-    }
-    authError.textContent = 'Secure sign-in is not connected yet. This screen is a UI preview only.';
-    authError.hidden = false;
-    password.select();
+  loginForm.addEventListener("submit", async event => {
+    event.preventDefault(); authError.hidden = true;
+    try {
+      await api("/api/auth/login", {method:"POST",body:JSON.stringify({password:password.value})});
+      authenticated = true; showDashboard();
+    } catch (error) { message(authError,error.message); }
   });
-  document.getElementById('preview-dashboard').addEventListener('click', showDashboard);
-  togglePassword.addEventListener('click', () => {
-    const reveal = password.type === 'password';
-    password.type = reveal ? 'text' : 'password';
-    togglePassword.setAttribute('aria-label', reveal ? 'Hide password' : 'Show password');
+  $("preview-dashboard").addEventListener("click", () => {
+    authenticated = false; showDashboard();
+    $("add-record").disabled = true;
+    document.querySelector(".preview-notice")?.remove();
+    const notice = document.createElement("div"); notice.className="preview-notice";
+    notice.innerHTML = "<span>ⓘ</span><div><strong>Read-only preview</strong><small>Sign in with the configured admin password to enable editing and GitHub commits.</small></div>";
+    document.querySelector(".dashboard-main").insertBefore(notice,document.querySelector(".page-content"));
   });
-  logoutButton.addEventListener('click', showLogin);
-  mobileMenu.addEventListener('click', () => sidebar.classList.toggle('open'));
-  document.getElementById('current-year').textContent = new Date().getFullYear();
+  $("toggle-password").addEventListener("click", () => {
+    const reveal=password.type==="password"; password.type=reveal?"text":"password";
+    $("toggle-password").setAttribute("aria-label",reveal?"Hide password":"Show password");
+  });
+  $("logout-button").addEventListener("click", async () => {
+    if (authenticated) { try { await api("/api/auth/logout",{method:"POST"}); } catch (_) {} }
+    showLogin();
+  });
+  $("mobile-menu").addEventListener("click",()=>sidebar.classList.toggle("open"));
+  $("current-year").textContent=new Date().getFullYear();
 
-  function safeUrl(value) {
-    try {
-      const url = new URL(value, window.location.origin);
-      return ['http:', 'https:'].includes(url.protocol) ? url.href : '';
-    } catch (_) { return ''; }
+  function categoryList(){return files["assets/data/common/categories.json"] || [];}
+  function allRecords(){return sources.flatMap(path => (files[path]||[]).map((r,index)=>({...r,_path:path,_index:index})));}
+  function categoryFor(record){return categoryList().find(c=>c.id===record.category)?.label || record.category || "—";}
+  function setStats(){
+    const all=allRecords(), android=all.filter(r=>r.platform==="android").length, windows=all.length-android;
+    $("stat-total").textContent=all.length;$("stat-categories").textContent=categoryList().length;
+    $("stat-android").textContent=android;$("stat-windows").textContent=windows;
+    $("nav-category-count").textContent=categoryList().length;$("nav-android-count").textContent=android;$("nav-windows-count").textContent=windows;
   }
-  function cell(row, value) {
-    const td = document.createElement('td');
-    td.textContent = value == null || value === '' ? '—' : String(value);
-    row.appendChild(td);
-    return td;
+  function td(row,value){const el=document.createElement("td");el.textContent=value??"—";row.append(el);return el;}
+  function actionButton(label,action,kind){const b=document.createElement("button");b.type="button";b.className="row-action "+(kind||"");b.textContent=label;b.addEventListener("click",action);return b;}
+  function render(){
+    const cfg=titles[currentView];$("page-title").textContent=cfg[0];$("breadcrumb-current").textContent=cfg[0];
+    $("page-description").textContent=cfg[1];$("table-title").textContent=cfg[2];$("table-description").textContent=cfg[3];
+    document.querySelectorAll("[data-view]").forEach(b=>b.classList.toggle("active",b.dataset.view===currentView));
+    const isCat=currentView==="categories";
+    header.replaceChildren(...(isCat?["CATEGORY","CATEGORY ID","JSON FILE","RECORDS","ACTIONS"]:["APPLICATION","PLATFORM","CATEGORY","VERSION / STATUS","ACTIONS"]).map(t=>{const th=document.createElement("th");th.textContent=t;return th;}));
+    const q=search.value.trim().toLowerCase();
+    const list=isCat?categoryList().map(c=>({...c,_kind:"category"})):allRecords().filter(r=>currentView==="overview"||r.platform===currentView);
+    const shown=list.filter(x=>JSON.stringify(x).toLowerCase().includes(q));tbody.replaceChildren();
+    shown.forEach(item=>{
+      const tr=document.createElement("tr");
+      if(isCat){
+        td(tr,item.label);td(tr,item.id);td(tr,item.file);
+        td(tr,allRecords().filter(r=>r.category===item.id).length);
+      } else {
+        const name=td(tr,"");const wrap=document.createElement("div");wrap.className="record-name";
+        const av=document.createElement("span");av.className="record-avatar"+(item.platform==="windows"?" windows-avatar":"");av.textContent=(item.icon||item.name||"A").slice(0,2);
+        const info=document.createElement("span"),strong=document.createElement("strong"),small=document.createElement("small");
+        strong.textContent=item.name||"Untitled";small.textContent=item.id||"";info.append(strong,small);wrap.append(av,info);name.append(wrap);
+        const p=td(tr,item.platform==="windows"?"Windows":"Android");p.className="platform-tag "+(item.platform==="windows"?"windows-tag":"android-tag");
+        td(tr,categoryFor(item));td(tr,[item.version,item.status].filter(Boolean).join(" / ")||"—");
+      }
+      const actions=td(tr,"");actions.className="row-actions";
+      if(authenticated){
+        actions.append(actionButton("Edit",()=>openEditor(isCat?"category":"record",item)));
+        actions.append(actionButton("Delete",()=>removeItem(isCat?"category":"record",item),"danger"));
+      } else actions.textContent="Read only";
+      tbody.append(tr);
+    });
+    if(!shown.length){const tr=document.createElement("tr"),cell=document.createElement("td");cell.colSpan=5;cell.textContent="No matching entries.";cell.style.textAlign="center";cell.style.padding="28px";tr.append(cell);tbody.append(tr);}
+    footerCount.textContent=isCat?("Showing "+shown.length+" of "+list.length+" categories"):("Showing "+shown.length+" of "+list.length+" records");
+    $("add-record").disabled=!authenticated;
+    $("add-record").textContent=isCat?"＋ Add category":"＋ Add record";
+    setStats();
   }
-  function renderRecord(record) {
-    const tr = document.createElement('tr');
-    const nameCell = document.createElement('td');
-    const nameWrap = document.createElement('div');
-    nameWrap.className = 'record-name';
-    const avatar = document.createElement('span');
-    avatar.className = 'record-avatar' + (record.platform === 'windows' ? ' windows-avatar' : '');
-    avatar.textContent = (record.icon || record.name || 'A').slice(0, 2);
-    const nameInfo = document.createElement('span');
-    const strong = document.createElement('strong');
-    strong.textContent = record.name || 'Untitled record';
-    const small = document.createElement('small');
-    small.textContent = record.id || '';
-    nameInfo.append(strong, small);
-    nameWrap.append(avatar, nameInfo);
-    nameCell.appendChild(nameWrap);
-    tr.appendChild(nameCell);
-    const platform = document.createElement('td');
-    const platformTag = document.createElement('span');
-    platformTag.className = 'platform-tag ' + (record.platform === 'windows' ? 'windows-tag' : 'android-tag');
-    platformTag.textContent = record.platform === 'windows' ? 'Windows' : 'Android';
-    platform.appendChild(platformTag);
-    tr.appendChild(platform);
-    cell(tr, record.categoryLabel || record.category);
-    const status = document.createElement('td');
-    const statusTag = document.createElement('span');
-    statusTag.className = 'status-tag ' + (/development|beta|testing/i.test(record.status || '') ? 'in-progress' : 'published');
-    statusTag.textContent = [record.version, record.status].filter(Boolean).join(' / ') || '—';
-    status.appendChild(statusTag);
-    tr.appendChild(status);
-    const details = document.createElement('td');
-    const url = safeUrl(record.url);
-    if (url) {
-      const link = document.createElement('a');
-      link.href = url;
-      link.target = '_blank';
-      link.rel = 'noopener noreferrer';
-      link.textContent = 'Open ↗';
-      details.appendChild(link);
-    } else {
-      details.textContent = '—';
+  async function loadCatalogue(){
+    refreshButton.disabled=true;refreshButton.textContent="↻ Loading…";
+    try{
+      if(authenticated){
+        const result=await api("/api/catalogue");files=result.files;
+      } else {
+        const paths=["assets/data/common/categories.json",...sources];
+        const result=await Promise.all(paths.map(async p=>{const r=await fetch(p+"?v="+Date.now(),{cache:"no-store"});if(!r.ok)throw new Error("Could not load "+p);return [p,await r.json()];}));
+        files=Object.fromEntries(result);
+      }
+      original=JSON.parse(JSON.stringify(files));dirty.clear();render();
+    }catch(error){tbody.replaceChildren();const tr=document.createElement("tr"),tdx=document.createElement("td");tdx.colSpan=5;tdx.textContent="Catalogue load failed: "+error.message;tdx.style.padding="24px";tr.append(tdx);tbody.append(tr);}
+    finally{refreshButton.disabled=false;refreshButton.textContent="↻ Refresh";}
+  }
+  function inputField(label,name,value,type="text",required=false){
+    const wrap=document.createElement("label");wrap.className="editor-field";const cap=document.createElement("span");cap.textContent=label;
+    let control;
+    if(type==="textarea"){control=document.createElement("textarea");control.rows=3;}else if(type==="select"){control=document.createElement("select");}
+    else{control=document.createElement("input");control.type=type;}
+    control.name=name;control.value=value??"";control.required=required;control.className="editor-input";
+    wrap.append(cap,control);return wrap;
+  }
+  function openEditor(kind,item=null){
+    editorKind=kind;editing=item?{...item}:null;fields.replaceChildren();$("editor-error").hidden=true;
+    $("editor-title").textContent=(item?"Edit ":"Add ")+(kind==="category"?"category":"record");
+    if(kind==="category"){
+      fields.append(inputField("Category ID","id",item?.id||"", "text",true),inputField("Display label","label",item?.label||"","text",true),inputField("JSON filename","file",item?.file||"","text",true));
+    }else{
+      const platform=item?.platform||(currentView==="windows"?"windows":"android");
+      const catWrap=inputField("Category","category",item?.category||categoryList()[0]?.id||"","select",true);
+      const select=catWrap.querySelector("select");categoryList().forEach(c=>{const o=document.createElement("option");o.value=c.id;o.textContent=c.label;select.append(o);});
+      const platformWrap=inputField("Platform","platform",platform,"select",true);
+      ["android","windows"].forEach(v=>{const o=document.createElement("option");o.value=v;o.textContent=v==="android"?"Android":"Windows";platformWrap.querySelector("select").append(o);});
+      fields.append(inputField("Application ID (unique)","id",item?.id||"","text",true),inputField("Application name","name",item?.name||"","text",true),platformWrap,catWrap,
+        inputField("Version","version",item?.version||""),inputField("Status","status",item?.status||"In development"),inputField("Icon text","icon",item?.icon||""),
+        inputField("Description","description",item?.description||"","textarea"),inputField("Details page URL","detailUrl",item?.detailUrl||""),inputField("Project / download URL","url",item?.url||""),
+        inputField("Screenshots (comma-separated filenames)","screenshots",(item?.screenshots||[]).join(", ")));
     }
-    tr.appendChild(details);
-    return tr;
+    editor.showModal();
   }
-  function renderCategory(category) {
-    const tr = document.createElement('tr');
-    cell(tr, category.label);
-    cell(tr, category.id);
-    cell(tr, category.file);
-    const count = records.filter(record => record.category === category.id).length;
-    cell(tr, count);
-    cell(tr, 'Android + Windows');
-    return tr;
-  }
-  function updateStats() {
-    const androidCount = records.filter(record => record.platform === 'android').length;
-    const windowsCount = records.filter(record => record.platform === 'windows').length;
-    document.getElementById('stat-total').textContent = records.length;
-    document.getElementById('stat-categories').textContent = categories.length;
-    document.getElementById('stat-android').textContent = androidCount;
-    document.getElementById('stat-windows').textContent = windowsCount;
-    document.getElementById('nav-category-count').textContent = categories.length;
-    document.getElementById('nav-android-count').textContent = androidCount;
-    document.getElementById('nav-windows-count').textContent = windowsCount;
-  }
-  function renderView() {
-    const config = views[currentView] || views.overview;
-    title.textContent = config[0];
-    breadcrumb.textContent = config[0];
-    description.textContent = config[1];
-    tableTitle.textContent = config[2];
-    tableDescription.textContent = config[3];
-    navItems.forEach(item => item.classList.toggle('active', item.dataset.view === currentView));
-    header.replaceChildren(...(currentView === 'categories' ? headers.categories : headers.records).map(label => {
-      const th = document.createElement('th');
-      th.textContent = label;
-      return th;
-    }));
-    const query = (search.value || '').trim().toLowerCase();
-    const visibleItems = currentView === 'categories'
-      ? categories.filter(item => JSON.stringify(item).toLowerCase().includes(query))
-      : records.filter(item => (currentView === 'overview' || item.platform === currentView)
-          && JSON.stringify(item).toLowerCase().includes(query));
-    tbody.replaceChildren();
-    visibleItems.forEach(item => tbody.appendChild(currentView === 'categories' ? renderCategory(item) : renderRecord(item)));
-    if (!visibleItems.length) {
-      const tr = document.createElement('tr');
-      const td = document.createElement('td');
-      td.colSpan = 5;
-      td.textContent = loaded ? 'No matching records found.' : 'Loading catalogue…';
-      td.style.textAlign = 'center';
-      td.style.padding = '28px';
-      tr.appendChild(td);
-      tbody.appendChild(tr);
+  function markDirty(path){dirty.add(path);}
+  function removeItem(kind,item){
+    const label=kind==="category"?item.label:item.name;
+    if(!window.confirm("Delete "+label+"? This change will be reviewed before it is committed."))return;
+    if(kind==="category"){
+      if(allRecords().some(r=>r.category===item.id)){window.alert("This category still has records. Move or delete those records first.");return;}
+      files["assets/data/common/categories.json"]=categoryList().filter(c=>c.id!==item.id);markDirty("assets/data/common/categories.json");
+    }else{
+      files[item._path]=(files[item._path]||[]).filter((_,i)=>i!==item._index);markDirty(item._path);
     }
-    footerCount.textContent = currentView === 'categories'
-      ? `Showing ${visibleItems.length} of ${categories.length} categories`
-      : `Showing ${visibleItems.length} of ${(currentView === 'overview' ? records.length : records.filter(item => item.platform === currentView).length)} records`;
+    render();
   }
-  async function loadCatalogue() {
-    refreshButton.disabled = true;
-    refreshButton.textContent = '↻ Loading…';
-    try {
-      const [categoryResponse, ...responses] = await Promise.all([
-        fetch('assets/data/common/categories.json', { cache: 'no-store' }),
-        ...sources.map(([, , path]) => fetch(path, { cache: 'no-store' }))
-      ]);
-      if (!categoryResponse.ok) throw new Error('Could not load categories.json (' + categoryResponse.status + ').');
-      const categoryData = await categoryResponse.json();
-      const arrays = await Promise.all(responses.map(async (response, index) => {
-        if (!response.ok) throw new Error('Could not load ' + sources[index][2] + ' (' + response.status + ').');
-        const data = await response.json();
-        if (!Array.isArray(data)) throw new Error(sources[index][2] + ' must contain a JSON array.');
-        return data.map(record => ({ ...record, platform: sources[index][0], sourceCategory: sources[index][1] }));
-      }));
-      if (!Array.isArray(categoryData)) throw new Error('categories.json must contain a JSON array.');
-      categories = categoryData;
-      const labels = new Map(categories.map(category => [category.id, category.label]));
-      records = arrays.flat().map(record => ({ ...record, categoryLabel: labels.get(record.category) || record.category }));
-      loaded = true;
-      updateStats();
-      renderView();
-    } catch (error) {
-      loaded = false;
-      tbody.replaceChildren();
-      const tr = document.createElement('tr');
-      const td = document.createElement('td');
-      td.colSpan = 5;
-      td.textContent = 'Catalogue could not be loaded: ' + error.message;
-      td.style.color = '#ffaaaa';
-      td.style.padding = '24px';
-      tr.appendChild(td);
-      tbody.appendChild(tr);
-      footerCount.textContent = 'Catalogue data unavailable';
-    } finally {
-      refreshButton.disabled = false;
-      refreshButton.textContent = '↻ Refresh';
-    }
-  }
-  navItems.forEach(item => item.addEventListener('click', () => {
-    currentView = item.dataset.view || 'overview';
-    search.value = '';
-    renderView();
-    sidebar.classList.remove('open');
-  }));
-  search.addEventListener('input', renderView);
-  refreshButton.addEventListener('click', loadCatalogue);
-  document.getElementById('add-record').addEventListener('click', () => {
-    // Editing stays disabled until authenticated Worker endpoints are connected.
+  editorForm.addEventListener("submit",event=>{
+    event.preventDefault();const data=Object.fromEntries(new FormData(editorForm).entries());
+    try{
+      if(editorKind==="category"){
+        const list=[...categoryList()];if(!/^[a-z0-9-]+$/.test(data.id))throw new Error("Category ID may contain lowercase letters, numbers and hyphens only.");
+        if(list.some(c=>c.id===data.id&&(!editing||editing.id!==data.id)))throw new Error("Category ID already exists.");
+        const next={id:data.id,label:data.label.trim(),file:data.file.trim()};
+        const index=editing?list.findIndex(c=>c.id===editing.id):-1;if(index>=0)list[index]=next;else list.push(next);
+        files["assets/data/common/categories.json"]=list;markDirty("assets/data/common/categories.json");
+      }else{
+        const platform=data.platform,cat=categoryList().find(c=>c.id===data.category);if(!cat)throw new Error("Select a valid category.");
+        const path="assets/data/"+platform+"/"+cat.file;
+        const next={id:data.id.trim(),name:data.name.trim(),platform,category:data.category,version:data.version.trim(),description:data.description.trim(),icon:data.icon.trim(),status:data.status.trim(),detailUrl:data.detailUrl.trim(),url:data.url.trim(),screenshots:data.screenshots.split(",").map(s=>s.trim()).filter(Boolean)};
+        if(!next.id||!next.name)throw new Error("ID and name are required.");
+        const list=[...(files[path]||[])];
+        if(list.some(r=>r.id===next.id&&(!editing||editing.id!==next.id||editing._path!==path)))throw new Error("This ID already exists in the selected JSON file.");
+        if(editing){const old=files[editing._path]||[];files[editing._path]=old.filter((_,i)=>i!==editing._index);markDirty(editing._path);}
+        const updated=files[path]||[];const index=editing&&editing._path===path?editing._index:-1;
+        if(index>=0){updated.splice(index,0,next);}else updated.push(next);
+        files[path]=updated;markDirty(path);
+      }
+      editor.close();render();
+    }catch(error){message($("editor-error"),error.message);}
   });
-  renderView();
+  function showReview(){
+    if(!dirty.size)return;
+    reviewFiles.replaceChildren();
+    [...dirty].forEach(path=>{const li=document.createElement("li");li.innerHTML="<strong></strong><small></small>";li.querySelector("strong").textContent=path;li.querySelector("small").textContent=(original[path]||[]).length+" → "+(files[path]||[]).length+" entries";reviewFiles.append(li);});
+    $("review-error").hidden=true;review.showModal();
+  }
+  async function commitChanges(){
+    $("confirm-commit").disabled=true;$("confirm-commit").textContent="Committing…";
+    try{
+      const payload={files:Object.fromEntries([...dirty].map(path=>[path,files[path]])),message:$("commit-message").value};
+      const result=await api("/api/commit",{method:"POST",body:JSON.stringify(payload)});
+      review.close();window.alert("Committed successfully to "+result.branch+". Commit: "+result.commit.slice(0,7));
+      await loadCatalogue();
+    }catch(error){message($("review-error"),error.message);}
+    finally{$("confirm-commit").disabled=false;$("confirm-commit").textContent="Confirm & commit";}
+  }
+  $("add-record").addEventListener("click",()=>openEditor(currentView==="categories"?"category":"record"));
+  $("editor-close").addEventListener("click",()=>editor.close());$("editor-cancel").addEventListener("click",()=>editor.close());
+  $("review-close").addEventListener("click",()=>review.close());$("review-cancel").addEventListener("click",()=>review.close());
+  $("confirm-commit").addEventListener("click",commitChanges);
+  $("refresh-button").addEventListener("click",loadCatalogue);search.addEventListener("input",render);
+  document.querySelectorAll("[data-view]").forEach(b=>b.addEventListener("click",()=>{currentView=b.dataset.view;search.value="";render();sidebar.classList.remove("open");}));
+  render();
+  api("/api/auth/me").then(()=>{authenticated=true;showDashboard();}).catch(()=>{});
 })();
