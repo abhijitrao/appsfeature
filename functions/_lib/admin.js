@@ -66,7 +66,7 @@ export function clearSessionCookie() {
 }
 export function sameOrigin(request) {
   const origin = request.headers.get("Origin");
-  if (!origin) return true;
+  if (!origin) return false;
   try { return new URL(origin).host === new URL(request.url).host; } catch (_) { return false; }
 }
 export async function github(path, env, options = {}) {
@@ -93,6 +93,7 @@ export function validateCatalogue(path, data) {
     for (const item of data) {
       if (!item || typeof item.id !== "string" || typeof item.label !== "string" || typeof item.file !== "string") throw new Error("Each category needs id, label and file.");
       if (ids.has(item.id)) throw new Error("Duplicate category id: " + item.id);
+      if (!["apps.json", "utilities.json", "developer-tools.json"].includes(item.file)) throw new Error("Category file must be one of the approved catalogue JSON files.");
       ids.add(item.id);
     }
     return;
