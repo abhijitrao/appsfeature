@@ -6,6 +6,7 @@
   const refreshButton = $("refresh-button"), footerCount = document.querySelector(".table-footer > span:first-child");
   const editor = $("editor-dialog"), editorForm = $("editor-form"), fields = $("editor-fields");
   const review = $("review-dialog"), reviewFiles = $("review-files");
+  const successDialog = $("commit-success-dialog");
   const sources = ["assets/data/android/apps.json","assets/data/android/utilities.json","assets/data/android/developer-tools.json","assets/data/windows/apps.json","assets/data/windows/utilities.json","assets/data/windows/developer-tools.json"];
   const titles = {
     overview:["Overview","A quick view of your application catalogue and content.","Catalogue snapshot","All catalogue entries."],
@@ -260,7 +261,12 @@
     try{
       const payload={branch:selectedBranch,files:Object.fromEntries([...dirty].map(path=>[path,files[path]])),screenshots:screenshotUploads.map(({name,base64})=>({name,base64})),message:$("commit-message").value};
       const result=await api("/api/commit",{method:"POST",body:JSON.stringify(payload)});
-      review.close();window.alert("Committed successfully to "+result.branch+". Commit: "+result.commit.slice(0,7));
+      review.close();
+      $("success-branch").textContent=result.branch;
+      $("success-commit").textContent=result.commit.slice(0,7);
+      const removed=Array.isArray(result.deletedScreenshots)?result.deletedScreenshots.length:0;
+      $("success-cleanup").textContent=removed?removed+" unused screenshot"+(removed===1?"":"s")+" removed from the repository.":"Catalogue and screenshot references are up to date.";
+      successDialog.showModal();
       await loadCatalogue();
     }catch(error){message($("review-error"),error.message);}
     finally{$("confirm-commit").disabled=false;$("confirm-commit").textContent="Confirm & commit";}
@@ -268,6 +274,7 @@
   $("add-record").addEventListener("click",()=>openEditor(currentView==="categories"?"category":"record"));
   $("editor-close").addEventListener("click",()=>editor.close());$("editor-cancel").addEventListener("click",()=>editor.close());
   $("review-close").addEventListener("click",()=>review.close());$("review-cancel").addEventListener("click",()=>review.close());
+  $("success-done").addEventListener("click",()=>successDialog.close());
   $("confirm-commit").addEventListener("click",commitChanges);
   $("review-changes-button").addEventListener("click",showReview);
   $("branch-select").addEventListener("change", async event=>{
