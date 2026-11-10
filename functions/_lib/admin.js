@@ -16,6 +16,7 @@ export const CATALOGUE_PATHS = [
 ];
 const encoder = new TextEncoder();
 const decoder = new TextDecoder();
+const SESSION_TTL = 8 * 60 * 60;
 
 export function reply(data, status = 200, extra = {}) {
   return new Response(JSON.stringify(data), {
@@ -23,7 +24,7 @@ export function reply(data, status = 200, extra = {}) {
     headers: { "content-type": "application/json; charset=utf-8", "cache-control": "no-store", ...extra }
   });
 }
-export function fail(message, status = 400) { return reply({ error: message }, status); }
+export function fail(message, status = 400, extra = {}) { return reply({ error: message }, status, extra); }
 export function cookieValue(request, name) {
   const raw = request.headers.get("Cookie") || "";
   const item = raw.split(";").map(v => v.trim()).find(v => v.startsWith(name + "="));
@@ -49,19 +50,40 @@ function constantEqual(a, b) {
   for (let i = 0; i < a.length; i++) diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
   return diff === 0;
 }
-export async function createSession(env) {
-  const payload = b64url(encoder.encode(JSON.stringify({ exp: Date.now() + 8 * 60 * 60 * 1000, nonce: crypto.randomUUID() })));
-  return payload + "." + await hmac(payload, env.SESSION_SECRET);
-}
-export async function isAuthenticated(request, env) {
-  if (!env.SESSION_SECRET) return false;
+async function readSession(request, env) {
+  if (!env.SESSION_SECRET) return null;
   const token = cookieValue(request, "af_admin");
   const [payload, signature, extra] = token.split(".");
-  if (!payload || !signature || extra || !constantEqual(signature, await hmac(payload, env.SESSION_SECRET))) return false;
+  if (!payload || !signature || extra || !constantEqual(signature, await hmac(payload, env.SESSION_SECRET))) return null;
   try {
     const session = JSON.parse(decoder.decode(fromB64url(payload)));
-    return Number.isFinite(session.exp) && session.exp > Date.now();
-  } catch (_) { return false; }
+    if (!Number.isFinite(session.exp) || session.exp <= Date.now() || typeof session.nonce !== "string") return null;
+    return session;
+  } catch (_) { return null; }
+}
+export async function createSession(env) {
+  if (!env.ADMIN_SECURITY) throw new Error("Admin security KV binding is not configured.");
+  const session = { exp: Date.now() + SESSION_TTL * 1000, nonce: crypto.randomUUID() };
+  const payload = b64url(encoder.encode(JSON.stringify(session)));
+  const token = payload + "." + await hmac(payload, env.SESSION_SECRET);
+  await env.ADMIN_SECURITY.put("session:" + session.nonce, "active", { expirationTtl: SESSION_TTL });
+  return token;
+}
+export async function isAuthenticated(request, env) {
+  if (!env.ADMIN_SECURITY) return false;
+  const session = await readSession(request, env);
+  if (!session) return false;
+  return await env.ADMIN_SECURITY.get("session:" + session.nonce) === "active";
+}
+export async function revokeSession(request, env) {
+  if (!env.ADMIN_SECURITY) return;
+  const session = await readSession(request, env);
+  if (session) await env.ADMIN_SECURITY.delete("session:" + session.nonce);
+}
+export async function loginAttemptKey(request) {
+  const ip = request.headers.get("CF-Connecting-IP") || "unknown";
+  const digest = await crypto.subtle.digest("SHA-256", encoder.encode(ip));
+  return "login-attempts:" + b64url(new Uint8Array(digest));
 }
 export function sessionCookie(value) {
   return "af_admin=" + value + "; Path=/; Max-Age=28800; HttpOnly; Secure; SameSite=Strict";
