@@ -1,0 +1,41 @@
+name: Admin Panel Preview
+
+on:
+  push:
+    branches:
+      - feature-admin
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: admin-preview
+  cancel-in-progress: true
+
+jobs:
+  package-preview:
+    name: Package feature-admin preview
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout feature-admin
+        uses: actions/checkout@v4
+        with:
+          ref: feature-admin
+
+      - name: Validate Admin Panel files
+        run: |
+          test -f admin.html
+          test -f assets/css/admin.css
+          test -f assets/js/admin.js
+
+      - name: Upload preview package
+        uses: actions/upload-artifact@v4
+        with:
+          name: appsfeature-admin-preview-${{ github.sha }}
+          path: |
+            ./
+            !./.git/**
+            !./.github/**
+          if-no-files-found: error
+          retention-days: 7
