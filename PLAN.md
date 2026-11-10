@@ -51,6 +51,8 @@ Add or update entries in the appropriate platform/category JSON file under `asse
 - [ ] Configure `appsfeature.com` DNS and GitHub Pages custom domain/HTTPS.
 - [x] Add Website Privacy Policy and Terms & Conditions pages and footer navigation.
 - [ ] Verify mobile/desktop layouts, navigation, search, and all outbound links.
+- [x] Improve page-specific SEO titles and social-sharing metadata across all pages.
+- [x] Add truthful WebSite and Person structured data for search engines.
 - [x] Add dedicated DroidShare WiFi and Network Simulator detail pages using verified repository documentation and clear implementation status.
 - [x] Keep `abhijitrao/appsfeature` as the permanent source repository; no fork is required.
 
