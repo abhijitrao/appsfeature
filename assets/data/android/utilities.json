@@ -15,5 +15,18 @@
       "droidshare-wifi-snap2.png",
       "droidshare-wifi-snap3.png"
     ]
+  },
+  {
+    "id": "Testid",
+    "name": "Test record",
+    "platform": "android",
+    "category": "utility",
+    "version": "1.0",
+    "description": "",
+    "icon": "",
+    "status": "InTesting",
+    "detailUrl": "",
+    "url": "",
+    "screenshots": []
   }
 ]
