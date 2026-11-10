@@ -72,3 +72,24 @@ body{
     max-width:100vw;
   }
 }
+
+/* AppsFeature-branded platform marks */
+.platform-brand-icon{
+ width:15px;
+ height:15px;
+ flex:none;
+ fill:none;
+ stroke:var(--green);
+ stroke-width:1.7;
+ stroke-linecap:round;
+ stroke-linejoin:round;
+ vertical-align:-3px;
+ margin-right:7px;
+ filter:drop-shadow(0 0 5px #21e6a044);
+}
+.windows-brand-icon{fill:currentColor;stroke:none;color:var(--mint)}
+.android-brand-icon{color:var(--green)}
+.toolbar-platform-icon{width:13px;height:13px;margin:0}
+.float-chip{display:flex;align-items:center;gap:0}
+.float-chip .platform-brand-icon{width:16px;height:16px;margin-right:9px}
+.apps-toolbar>div{gap:9px}
