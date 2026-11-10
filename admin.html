@@ -101,6 +101,23 @@
       </div>
     </section>
   </main>
-  <script src="assets/js/admin.js"></script>
+
+  <dialog class="editor-dialog" id="editor-dialog">
+    <form id="editor-form" method="dialog">
+      <div class="dialog-heading"><div><p class="eyebrow">CATALOGUE EDITOR</p><h2 id="editor-title">Add record</h2></div><button class="icon-button" type="button" id="editor-close" aria-label="Close">×</button></div>
+      <div class="editor-fields" id="editor-fields"></div>
+      <p class="form-error" id="editor-error" role="alert" hidden></p>
+      <div class="dialog-actions"><button class="secondary-button" type="button" id="editor-cancel">Cancel</button><button class="primary-button" type="submit" id="editor-review">Review changes →</button></div>
+    </form>
+  </dialog>
+  <dialog class="editor-dialog review-dialog" id="review-dialog">
+    <div class="dialog-heading"><div><p class="eyebrow">FINAL REVIEW</p><h2>Confirm catalogue changes</h2></div><button class="icon-button" type="button" id="review-close" aria-label="Close">×</button></div>
+    <p class="review-copy">The following JSON files will be committed to <strong>feature-admin</strong>. Production branch <strong>main</strong> will not be changed.</p>
+    <ul id="review-files" class="review-files"></ul>
+    <label class="field-label" for="commit-message">Commit message</label><input id="commit-message" class="editor-input" maxlength="120" value="Update application catalogue">
+    <p class="form-error" id="review-error" role="alert" hidden></p>
+    <div class="dialog-actions"><button class="secondary-button" type="button" id="review-cancel">Back to editor</button><button class="primary-button" type="button" id="confirm-commit">Confirm & commit</button></div>
+  </dialog>
+\n  <script src="assets/js/admin.js"></script>
 </body>
 </html>
