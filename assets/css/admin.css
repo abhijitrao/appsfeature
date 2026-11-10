@@ -41,3 +41,24 @@
 
 /* Screenshot picker and preview */
 .screenshot-field{grid-column:1/-1}.screenshot-field>label{color:#a9bcba;font-size:10px;font-weight:600}.screenshot-field input[type=file]{padding:9px}.screenshot-hint,.screenshot-empty{color:#809499;font-size:9px}.screenshot-previews{display:flex;flex-wrap:wrap;gap:10px;margin-top:4px}.screenshot-preview{position:relative;width:104px;padding:6px;border:1px solid var(--line);border-radius:7px;background:#101c21}.screenshot-preview img{display:block;width:90px;height:82px;object-fit:contain;background:#080f13;border-radius:4px}.screenshot-preview span{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#a9bcba;font-size:8px;margin-top:5px}.screenshot-preview button{position:absolute;top:2px;right:2px;width:21px;height:21px;border:1px solid #68424a;border-radius:50%;background:#28171b;color:#ffaaaa;font-size:15px;line-height:1}
+
+/* Branded commit success dialog */
+.commit-success-dialog{width:min(430px,calc(100% - 30px));padding:0;overflow:hidden;text-align:center;border-color:#285b48;background:radial-gradient(ellipse at 50% 0%,#173a2b 0%,#101a1d 48%,#0b1216 100%);box-shadow:0 28px 100px #000c}
+.commit-success-dialog::backdrop{background:#020708d9;backdrop-filter:blur(7px)}
+.success-content{padding:34px 30px 29px}
+.success-mark{width:58px;height:58px;margin:0 auto 19px;display:grid;place-items:center;border:1px solid #3a9c70;border-radius:50%;background:#123b2a;box-shadow:0 0 35px #21e6a02b;color:var(--green)}
+.success-mark span{font-size:29px;font-weight:700;line-height:1}
+.success-content .eyebrow{margin-bottom:9px}
+.success-content h2{font:600 clamp(23px,5vw,28px) var(--display);letter-spacing:-.9px;margin:0;color:#effff7}
+.success-content h2 span{color:var(--green)}
+.success-description{margin:10px 0 22px;color:#9eb2ae;font-size:11px;line-height:1.6}
+.success-meta{display:grid;grid-template-columns:1fr 1fr;gap:9px;text-align:left}
+.success-meta>div{min-width:0;padding:12px;border:1px solid #ffffff14;border-radius:8px;background:#07110f99}
+.success-meta span,.success-meta strong{display:block}
+.success-meta span{margin-bottom:7px;color:#71958a;font-size:8px;font-weight:700;letter-spacing:1.3px}
+.success-meta strong{overflow:hidden;text-overflow:ellipsis;color:#d9f8e9;font:600 11px var(--display);white-space:nowrap}
+.success-meta .success-hash{color:var(--green);font-family:monospace}
+.success-cleanup{min-height:30px;margin:14px 0 20px;color:#8ea69f;font-size:9px;line-height:1.5}
+.success-done{width:100%;min-height:43px;font-size:11px}
+.success-done span{font-size:16px}
+@media(max-width:520px){.success-content{padding:29px 21px 23px}}
