@@ -62,3 +62,18 @@
 .success-done{width:100%;min-height:43px;font-size:11px}
 .success-done span{font-size:16px}
 @media(max-width:520px){.success-content{padding:29px 21px 23px}}
+
+/* Keep branch status and sign-out reachable in the mobile drawer */
+@media(max-width:760px){
+  .sidebar-bottom{
+    position:sticky;
+    bottom:0;
+    z-index:2;
+    flex-shrink:0;
+    margin-top:auto;
+    padding:12px 0 max(4px,env(safe-area-inset-bottom));
+    background:linear-gradient(180deg,#0b1217 0%,#0b1217 18%);
+    border-top:1px solid var(--line);
+  }
+  .sidebar-bottom .branch-card{margin-bottom:9px}
+}
