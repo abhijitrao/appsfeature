@@ -103,6 +103,8 @@
     if(!shown.length){const tr=document.createElement("tr"),cell=document.createElement("td");cell.colSpan=5;cell.textContent="No matching entries.";cell.style.textAlign="center";cell.style.padding="28px";tr.append(cell);tbody.append(tr);}
     footerCount.textContent=isCat?("Showing "+shown.length+" of "+list.length+" categories"):("Showing "+shown.length+" of "+list.length+" records");
     $("add-record").disabled=!authenticated;
+    $("review-changes-button").disabled=!authenticated || dirty.size===0;
+    $("pending-change-count").textContent=dirty.size;
     $("add-record").textContent=isCat?"＋ Add category":"＋ Add record";
     setStats();
   }
@@ -208,6 +210,7 @@
   $("editor-close").addEventListener("click",()=>editor.close());$("editor-cancel").addEventListener("click",()=>editor.close());
   $("review-close").addEventListener("click",()=>review.close());$("review-cancel").addEventListener("click",()=>review.close());
   $("confirm-commit").addEventListener("click",commitChanges);
+  $("review-changes-button").addEventListener("click",showReview);
   $("branch-select").addEventListener("change", async event=>{
     const next=event.target.value;
     if(dirty.size && !window.confirm("Discard uncommitted local changes and switch to "+next+"?")){event.target.value=selectedBranch;return;}
