@@ -16,13 +16,18 @@
   try{const url=new URL(value,location.href);return ['https:','http:'].includes(url.protocol)?url.href:'#'}
   catch{return '#'}
  }
+ function platformIcon(value){
+  return value==='android'
+   ? '<svg class="platform-brand-icon toolbar-platform-icon android-brand-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M7.2 8.2 5.5 5.4m13 0-1.7 2.8M4.8 13.1c0-4 3.2-7.1 7.2-7.1s7.2 3.1 7.2 7.1H4.8Zm1.1.2v4.1a1.5 1.5 0 0 0 1.5 1.5h9.2a1.5 1.5 0 0 0 1.5-1.5v-4.1M3.4 13.2v4.1m17.2-4.1v4.1M9 9.5h.01M15 9.5h.01"/></svg>'
+   : '<svg class="platform-brand-icon toolbar-platform-icon windows-brand-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m3 5.2 8-1.1v7.2H3V5.2Zm10-1.4 8-1.1v8.6h-8V3.8ZM3 13h8v7.2l-8-1.1V13Zm10 0h8v8.6l-8-1.1V13Z"/></svg>';
+ }
  function render(){
   const filtered=apps.filter(app=>
    app.platform===platform&&
    (category==='all'||app.category===category)&&
    (app.name+' '+app.description+' '+app.category).toLowerCase().includes(query)
   );
-  label.textContent=(platform==='android'?'ANDROID':'WINDOWS')+' APPLICATIONS · '+filtered.length;
+  label.innerHTML=platformIcon(platform)+' '+(platform==='android'?'ANDROID':'WINDOWS')+' APPLICATIONS · '+filtered.length;
   grid.innerHTML=filtered.map(app=>
    '<article class="app-card"><div class="app-icon" aria-hidden="true">'+escapeHtml(app.icon||'AF')+'</div>'+
    '<div class="app-info"><h3>'+escapeHtml(app.name)+'</h3><p>'+escapeHtml(app.description)+'</p>'+
