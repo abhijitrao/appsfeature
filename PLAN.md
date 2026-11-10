@@ -54,6 +54,8 @@ Add or update entries in the appropriate platform/category JSON file under `asse
 - [x] Improve page-specific SEO titles and social-sharing metadata across all pages.
 - [x] Add truthful WebSite and Person structured data for search engines.
 - [x] Add dedicated DroidShare WiFi and Network Simulator detail pages using verified repository documentation and clear implementation status.
+- [x] Add crawlable Android and Windows collection landing pages with page-specific metadata and CollectionPage structured data.
+- [x] Link platform landing pages from the homepage and include them in the XML sitemap.
 - [x] Keep `abhijitrao/appsfeature` as the permanent source repository; no fork is required.
 
 - [x] Create a dedicated transparent favicon asset; preserve the approved logo geometry, proportions, and colors, and keep the existing header/footer logo unchanged.
