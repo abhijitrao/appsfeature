@@ -40,14 +40,6 @@
       authenticated = true; showDashboard();
     } catch (error) { message(authError,error.message); }
   });
-  $("preview-dashboard").addEventListener("click", () => {
-    authenticated = false; showDashboard();
-    $("add-record").disabled = true;
-    document.querySelector(".preview-notice")?.remove();
-    const notice = document.createElement("div"); notice.className="preview-notice";
-    notice.innerHTML = "<span>ⓘ</span><div><strong>Read-only preview</strong><small>Sign in with the configured admin password to enable editing and GitHub commits.</small></div>";
-    document.querySelector(".dashboard-main").insertBefore(notice,document.querySelector(".page-content"));
-  });
   $("toggle-password").addEventListener("click", () => {
     const reveal=password.type==="password"; password.type=reveal?"text":"password";
     $("toggle-password").setAttribute("aria-label",reveal?"Hide password":"Show password");
