@@ -137,6 +137,8 @@
       const select=catWrap.querySelector("select");categoryList().forEach(c=>{const o=document.createElement("option");o.value=c.id;o.textContent=c.label;select.append(o);});
       const platformWrap=inputField("Platform","platform",platform,"select",true);
       ["android","windows"].forEach(v=>{const o=document.createElement("option");o.value=v;o.textContent=v==="android"?"Android":"Windows";platformWrap.querySelector("select").append(o);});
+      platformWrap.querySelector("select").value=platform;
+      select.value=item?.category||categoryList()[0]?.id||"";
       fields.append(inputField("Application ID (unique)","id",item?.id||"","text",true),inputField("Application name","name",item?.name||"","text",true),platformWrap,catWrap,
         inputField("Version","version",item?.version||""),inputField("Status","status",item?.status||"In development"),inputField("Icon text","icon",item?.icon||""),
         inputField("Description","description",item?.description||"","textarea"),inputField("Details page URL","detailUrl",item?.detailUrl||""),inputField("Project / download URL","url",item?.url||""),
