@@ -120,6 +120,20 @@
     <p class="form-error" id="review-error" role="alert" hidden></p>
     <div class="dialog-actions"><button class="secondary-button" type="button" id="review-cancel">Back to editor</button><button class="primary-button" type="button" id="confirm-commit">Confirm & commit</button></div>
   </dialog>
-\n  <script src="assets/js/admin.js"></script>
+\n  <dialog class="editor-dialog commit-success-dialog" id="commit-success-dialog" aria-labelledby="success-title">
+    <div class="success-content">
+      <div class="success-mark" aria-hidden="true"><span>✓</span></div>
+      <p class="eyebrow">PUBLISHED TO GITHUB</p>
+      <h2 id="success-title">Commit successful<span>.</span></h2>
+      <p class="success-description">Your catalogue changes have been saved successfully.</p>
+      <div class="success-meta">
+        <div><span>BRANCH</span><strong id="success-branch">feature-admin</strong></div>
+        <div><span>COMMIT</span><strong class="success-hash" id="success-commit">0000000</strong></div>
+      </div>
+      <p class="success-cleanup" id="success-cleanup">Catalogue and screenshot references are up to date.</p>
+      <button class="primary-button success-done" id="success-done" type="button">Done <span>→</span></button>
+    </div>
+  </dialog>
+  <script src="assets/js/admin.js"></script>
 </body>
 </html>
