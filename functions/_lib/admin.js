@@ -21,7 +21,7 @@ const SESSION_TTL = 8 * 60 * 60;
 export function reply(data, status = 200, extra = {}) {
   return new Response(JSON.stringify(data), {
     status,
-    headers: { "content-type": "application/json; charset=utf-8", "cache-control": "no-store", ...extra }
+    headers: { "content-type": "application/json; charset=utf-8", "cache-control": "no-store", "x-content-type-options": "nosniff", "x-frame-options": "DENY", "referrer-policy": "no-referrer", "permissions-policy": "camera=(), microphone=(), geolocation=()", "cross-origin-resource-policy": "same-origin", ...extra }
   });
 }
 export function fail(message, status = 400, extra = {}) { return reply({ error: message }, status, extra); }
