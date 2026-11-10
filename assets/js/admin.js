@@ -52,6 +52,8 @@
     password.select();
   });
 
+  document.getElementById('preview-dashboard').addEventListener('click', showDashboard);
+
   togglePassword.addEventListener('click', () => {
     const reveal = password.type === 'password';
     password.type = reveal ? 'text' : 'password';
