@@ -77,3 +77,38 @@
   }
   .sidebar-bottom .branch-card{margin-bottom:9px}
 }
+
+/* Mobile drawer: pin the footer to the visible viewport, not the scroll area */
+@media(max-width:760px){
+  .sidebar{
+    position:fixed;
+    top:0;
+    bottom:0;
+    left:-270px;
+    width:248px;
+    height:100vh;
+    height:100dvh;
+    max-height:100dvh;
+    overflow:hidden;
+    overscroll-behavior:contain;
+    padding:18px 12px max(10px,env(safe-area-inset-bottom));
+  }
+  .sidebar.open{left:0}
+  .sidebar-brand{flex:0 0 auto;padding-bottom:20px;padding-right:38px}
+  .sidebar-label{flex:0 0 auto;padding-top:16px;padding-bottom:7px}
+  .sidebar-label.section-label{padding-top:18px}
+  .sidebar>.side-link{flex:0 0 42px}
+  .sidebar-bottom{
+    position:absolute;
+    left:12px;
+    right:12px;
+    bottom:max(10px,env(safe-area-inset-bottom));
+    z-index:3;
+    margin:0;
+    padding:10px 0 0;
+    background:#0b1217;
+    border-top:1px solid var(--line);
+  }
+  .sidebar-bottom .branch-card{margin-bottom:7px;padding:10px}
+  .sidebar-bottom .side-link{height:40px}
+}
