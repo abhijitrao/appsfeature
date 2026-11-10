@@ -13,7 +13,7 @@
     android:["Android catalogue","Applications and tools published for Android.","Android records","Android JSON catalogue."],
     windows:["Windows catalogue","Desktop applications and developer tools.","Windows records","Windows JSON catalogue."]
   };
-  let files = {}, original = {}, dirty = new Set(), currentView = "overview", editing = null, editorKind = "record", authenticated = false, pendingCommit = false, selectedBranch = "main";
+  let files = {}, original = {}, dirty = new Set(), currentView = "overview", editing = null, editorKind = "record", authenticated = false, pendingCommit = false, selectedBranch = "main", editorScreenshots = [], screenshotUploads = [];
 
   function message(el, text) { el.textContent = text; el.hidden = false; }
   async function api(path, options = {}) {
@@ -151,8 +151,22 @@
     control.name=name;control.value=value??"";control.required=required;control.className="editor-input";
     wrap.append(cap,control);return wrap;
   }
+  function renderScreenshotPreviews(container){
+    container.replaceChildren();
+    editorScreenshots.forEach((name,index)=>{
+      const card=document.createElement("div");card.className="screenshot-preview";
+      const image=document.createElement("img");image.alt=name;
+      const upload=screenshotUploads.find(file=>file.name===name);
+      image.src=upload?upload.previewUrl:"assets/images/screenshots/"+name;
+      const caption=document.createElement("span");caption.textContent=name;
+      const remove=document.createElement("button");remove.type="button";remove.textContent="×";
+      remove.addEventListener("click",()=>{editorScreenshots.splice(index,1);const found=screenshotUploads.findIndex(file=>file.name===name);if(found>=0){URL.revokeObjectURL(screenshotUploads[found].previewUrl);screenshotUploads.splice(found,1);}renderScreenshotPreviews(container);});
+      card.append(image,caption,remove);container.append(card);
+    });
+    if(!editorScreenshots.length){const empty=document.createElement("small");empty.className="screenshot-empty";empty.textContent="No screenshots selected.";container.append(empty);}
+  }
   function openEditor(kind,item=null){
-    editorKind=kind;editing=item?{...item}:null;fields.replaceChildren();$("editor-error").hidden=true;
+    editorKind=kind;editing=item?{...item}:null;fields.replaceChildren();$("editor-error").hidden=true;editorScreenshots=kind==="record"&&Array.isArray(item?.screenshots)?[...item.screenshots]:[];screenshotUploads.forEach(file=>URL.revokeObjectURL(file.previewUrl));screenshotUploads=[];
     $("editor-title").textContent=(item?"Edit ":"Add ")+(kind==="category"?"category":"record");
     if(kind==="category"){
       const idField=inputField("Category ID","id",item?.id||"", "text",true);
@@ -169,8 +183,26 @@
       select.value=item?.category||categoryList()[0]?.id||"";
       fields.append(inputField("Application ID (unique)","id",item?.id||"","text",true),inputField("Application name","name",item?.name||"","text",true),platformWrap,catWrap,
         inputField("Version","version",item?.version||""),inputField("Status","status",item?.status||"In development"),inputField("Icon text","icon",item?.icon||""),
-        inputField("Description","description",item?.description||"","textarea"),inputField("Details page URL","detailUrl",item?.detailUrl||""),inputField("Project / download URL","url",item?.url||""),
-        inputField("Screenshots (comma-separated filenames)","screenshots",(item?.screenshots||[]).join(", ")));
+        inputField("Description","description",item?.description||"","textarea"),inputField("Details page URL","detailUrl",item?.detailUrl||""),inputField("Project / download URL","url",item?.url||""));
+      const screenshotField=document.createElement("div");screenshotField.className="editor-field screenshot-field";
+      const screenshotLabel=document.createElement("label");screenshotLabel.textContent="Screenshots";
+      const picker=document.createElement("input");picker.type="file";picker.accept="image/png,image/jpeg,image/webp";picker.multiple=true;picker.className="editor-input";
+      const hint=document.createElement("small");hint.className="screenshot-hint";hint.textContent="PNG, JPG or WEBP · up to 2 MB each · 12 screenshots per record";
+      const preview=document.createElement("div");preview.className="screenshot-previews";
+      picker.addEventListener("change",()=>{
+        [...picker.files].forEach(file=>{
+          if(!["image/png","image/jpeg","image/webp"].includes(file.type)||file.size>2*1024*1024){message($("editor-error"),"Choose PNG, JPG or WEBP images up to 2 MB each.");return;}
+          if(editorScreenshots.length>=12){message($("editor-error"),"Maximum 12 screenshots per record.");return;}
+          const clean=(file.name||"screenshot").toLowerCase().replace(/[^a-z0-9._-]/g,"-");
+          const recordId=($("editor-form").elements.id?.value||"app").toLowerCase().replace(/[^a-z0-9-]/g,"-");
+          const name=(recordId+"-"+Date.now()+"-"+clean).slice(0,120);
+          const reader=new FileReader();
+          reader.onload=()=>{const base64=String(reader.result).split(",")[1];const previewUrl=URL.createObjectURL(file);screenshotUploads.push({name,base64,previewUrl});editorScreenshots.push(name);renderScreenshotPreviews(preview);};
+          reader.readAsDataURL(file);
+        });
+        picker.value="";
+      });
+      screenshotField.append(screenshotLabel,picker,hint,preview);fields.append(screenshotField);renderScreenshotPreviews(preview);
     }
     editor.showModal();
   }
@@ -198,7 +230,7 @@
       }else{
         const platform=data.platform,cat=categoryList().find(c=>c.id===data.category);if(!cat)throw new Error("Select a valid category.");
         const path="assets/data/"+platform+"/"+cat.file;
-        const next={id:data.id.trim(),name:data.name.trim(),platform,category:data.category,version:data.version.trim(),description:data.description.trim(),icon:data.icon.trim(),status:data.status.trim(),detailUrl:data.detailUrl.trim(),url:data.url.trim(),screenshots:data.screenshots.split(",").map(s=>s.trim()).filter(Boolean)};
+        const next={id:data.id.trim(),name:data.name.trim(),platform,category:data.category,version:data.version.trim(),description:data.description.trim(),icon:data.icon.trim(),status:data.status.trim(),detailUrl:data.detailUrl.trim(),url:data.url.trim(),screenshots:[...editorScreenshots]};
         if(!next.id||!next.name)throw new Error("ID and name are required.");
         const list=[...(files[path]||[])];
         if(list.some(r=>r.id===next.id&&(!editing||editing.id!==next.id||editing._path!==path)))throw new Error("This ID already exists in the selected JSON file.");
@@ -220,7 +252,7 @@
   async function commitChanges(){
     $("confirm-commit").disabled=true;$("confirm-commit").textContent="Committing…";
     try{
-      const payload={branch:selectedBranch,files:Object.fromEntries([...dirty].map(path=>[path,files[path]])),message:$("commit-message").value};
+      const payload={branch:selectedBranch,files:Object.fromEntries([...dirty].map(path=>[path,files[path]])),screenshots:screenshotUploads.map(({name,base64})=>({name,base64})),message:$("commit-message").value};
       const result=await api("/api/commit",{method:"POST",body:JSON.stringify(payload)});
       review.close();window.alert("Committed successfully to "+result.branch+". Commit: "+result.commit.slice(0,7));
       await loadCatalogue();
