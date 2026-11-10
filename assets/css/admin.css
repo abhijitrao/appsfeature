@@ -38,3 +38,6 @@
   .sidebar-backdrop.visible{display:block;opacity:1;pointer-events:auto}
   .sidebar.open{left:0}
 }
+
+/* Screenshot picker and preview */
+.screenshot-field{grid-column:1/-1}.screenshot-field>label{color:#a9bcba;font-size:10px;font-weight:600}.screenshot-field input[type=file]{padding:9px}.screenshot-hint,.screenshot-empty{color:#809499;font-size:9px}.screenshot-previews{display:flex;flex-wrap:wrap;gap:10px;margin-top:4px}.screenshot-preview{position:relative;width:104px;padding:6px;border:1px solid var(--line);border-radius:7px;background:#101c21}.screenshot-preview img{display:block;width:90px;height:82px;object-fit:contain;background:#080f13;border-radius:4px}.screenshot-preview span{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#a9bcba;font-size:8px;margin-top:5px}.screenshot-preview button{position:absolute;top:2px;right:2px;width:21px;height:21px;border:1px solid #68424a;border-radius:50%;background:#28171b;color:#ffaaaa;font-size:15px;line-height:1}
