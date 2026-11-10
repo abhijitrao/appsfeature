@@ -27,3 +27,4 @@
 .row-action:hover{border-color:#52dba7}
 .row-action.danger{border-color:#634047;background:#28171b;color:#ffaaaa}
 @media(max-width:520px){.editor-fields{grid-template-columns:1fr}.editor-field:has(textarea){grid-column:auto}.editor-dialog{padding:19px}.review-files li{flex-direction:column;gap:5px}}
+.branch-picker{display:flex;align-items:center;gap:8px;padding:5px 8px 5px 10px;border:1px solid var(--line);border-radius:7px;color:#9fb6b2;font-size:9px}.branch-picker select{max-width:190px;border:0;outline:0;background:#10191e;color:#c8e8dc;font:600 9px var(--font);padding:5px;border-radius:4px}.branch-picker select:focus{box-shadow:0 0 0 2px #21e6a044}.branch-picker select option{background:#10191e;color:var(--text)}@media(max-width:760px){.branch-picker{flex:1;justify-content:space-between}.branch-picker select{max-width:170px}}
